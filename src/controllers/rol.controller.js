@@ -1,6 +1,6 @@
 const rolService = require('../services/rol.service');
 const { createSchema, updateSchema } = require('../validators/rol.validator');
-const { BadRequestError } = require('../errors/httpErrors');
+const { BadRequestError, ForbiddenError } = require('../errors/httpErrors');
 
 const getAll = async (req, res, next) => {
   try {
@@ -34,6 +34,10 @@ const create = async (req, res, next) => {
 
 const update = async (req, res, next) => {
   try {
+    if (Number(req.params.id) === 1) {
+      throw new ForbiddenError('No se puede modificar el rol Administrador');
+    }
+
     const { error, value } = updateSchema.validate(req.body);
     if (error) throw new BadRequestError(error.details[0].message);
 
@@ -46,6 +50,10 @@ const update = async (req, res, next) => {
 
 const patchEstado = async (req, res, next) => {
   try {
+    if (Number(req.params.id) === 1) {
+      throw new ForbiddenError('No se puede modificar el rol Administrador');
+    }
+
     const { Estado } = req.body;
     if (Estado === undefined) throw new BadRequestError('El campo Estado es obligatorio');
 

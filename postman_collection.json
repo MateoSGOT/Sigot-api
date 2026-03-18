@@ -1,0 +1,824 @@
+{
+  "info": {
+    "name": "SIGOT API",
+    "description": "Colección completa de endpoints para la API del sistema de taller mecánico SIGOT",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "https://sigot-api.onrender.com", "type": "string" },
+    { "key": "token",   "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api","auth","login"] },
+            "body": { "mode": "raw", "raw": "{\n  \"Correo\": \"admin@sigot.com\",\n  \"Password\": \"Admin123!\"\n}" }
+          }
+        },
+        {
+          "name": "Registro",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/auth/registro", "host": ["{{baseUrl}}"], "path": ["api","auth","registro"] },
+            "body": { "mode": "raw", "raw": "{\n  \"Documento\": \"12345678\",\n  \"Nombre\": \"Juan Pérez\",\n  \"Id_TipoDoc\": 1,\n  \"Id_Rol\": 2,\n  \"Correo\": \"juan@sigot.com\",\n  \"Password\": \"Clave123!\"\n}" }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/auth/logout", "host": ["{{baseUrl}}"], "path": ["api","auth","logout"] },
+            "body": { "mode": "raw", "raw": "{}" }
+          }
+        },
+        {
+          "name": "Recuperar Password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/auth/recuperar-password", "host": ["{{baseUrl}}"], "path": ["api","auth","recuperar-password"] },
+            "body": { "mode": "raw", "raw": "{\n  \"Correo\": \"admin@sigot.com\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Roles",
+      "item": [
+        {
+          "name": "Listar roles",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/roles", "host": ["{{baseUrl}}"], "path": ["api","roles"] }
+          }
+        },
+        {
+          "name": "Consultar rol",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/roles/1", "host": ["{{baseUrl}}"], "path": ["api","roles","1"] }
+          }
+        },
+        {
+          "name": "Registrar rol",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/roles", "host": ["{{baseUrl}}"], "path": ["api","roles"] },
+            "body": { "mode": "raw", "raw": "{\n  \"Nombre\": \"Mecánico\",\n  \"Descripcion\": \"Rol para técnicos mecánicos\"\n}" }
+          }
+        },
+        {
+          "name": "Editar rol",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/roles/2", "host": ["{{baseUrl}}"], "path": ["api","roles","2"] },
+            "body": { "mode": "raw", "raw": "{\n  \"Nombre\": \"Mecánico Senior\",\n  \"Descripcion\": \"Rol para técnicos con experiencia\"\n}" }
+          }
+        },
+        {
+          "name": "Cambiar estado rol",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/roles/2/estado", "host": ["{{baseUrl}}"], "path": ["api","roles","2","estado"] },
+            "body": { "mode": "raw", "raw": "{\n  \"Estado\": false\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Permisos (Roles_x_Permisos)",
+      "item": [
+        {
+          "name": "Asignar permiso a rol",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/roles/2/permisos", "host": ["{{baseUrl}}"], "path": ["api","roles","2","permisos"] },
+            "body": { "mode": "raw", "raw": "{\n  \"Id_Permiso\": 1\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Clientes",
+      "item": [
+        {
+          "name": "Listar clientes",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/clientes", "host": ["{{baseUrl}}"], "path": ["api","clientes"] }
+          }
+        },
+        {
+          "name": "Consultar cliente",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/clientes/1", "host": ["{{baseUrl}}"], "path": ["api","clientes","1"] }
+          }
+        },
+        {
+          "name": "Registrar cliente",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/clientes", "host": ["{{baseUrl}}"], "path": ["api","clientes"] },
+            "body": { "mode": "raw", "raw": "{\n  \"Documento\": \"87654321\",\n  \"Nombre\": \"María García\",\n  \"Id_TipoDoc\": 1,\n  \"Telefono\": \"3001234567\",\n  \"Correo\": \"maria@email.com\",\n  \"Direccion\": \"Calle 10 # 20-30\"\n}" }
+          }
+        },
+        {
+          "name": "Editar cliente",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/clientes/1", "host": ["{{baseUrl}}"], "path": ["api","clientes","1"] },
+            "body": { "mode": "raw", "raw": "{\n  \"Nombre\": \"María García López\",\n  \"Telefono\": \"3009876543\"\n}" }
+          }
+        },
+        {
+          "name": "Cambiar estado cliente",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/clientes/1/estado", "host": ["{{baseUrl}}"], "path": ["api","clientes","1","estado"] },
+            "body": { "mode": "raw", "raw": "{\n  \"Estado\": false\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Vehículos",
+      "item": [
+        {
+          "name": "Listar vehículos",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/vehiculos", "host": ["{{baseUrl}}"], "path": ["api","vehiculos"] }
+          }
+        },
+        {
+          "name": "Consultar vehículo",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/vehiculos/1", "host": ["{{baseUrl}}"], "path": ["api","vehiculos","1"] }
+          }
+        },
+        {
+          "name": "Registrar vehículo",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/vehiculos", "host": ["{{baseUrl}}"], "path": ["api","vehiculos"] },
+            "body": { "mode": "raw", "raw": "{\n  \"Placa\": \"ABC123\",\n  \"Id_Cliente\": 1,\n  \"Id_Marca\": 1,\n  \"Modelo\": \"Corolla\",\n  \"Anio\": 2020,\n  \"Color\": \"Blanco\",\n  \"Kilometraje\": 15000\n}" }
+          }
+        },
+        {
+          "name": "Editar vehículo",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/vehiculos/1", "host": ["{{baseUrl}}"], "path": ["api","vehiculos","1"] },
+            "body": { "mode": "raw", "raw": "{\n  \"Kilometraje\": 20000,\n  \"Color\": \"Negro\"\n}" }
+          }
+        },
+        {
+          "name": "Cambiar estado vehículo",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/vehiculos/1/estado", "host": ["{{baseUrl}}"], "path": ["api","vehiculos","1","estado"] },
+            "body": { "mode": "raw", "raw": "{\n  \"Estado\": false\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Empleados",
+      "item": [
+        {
+          "name": "Listar empleados",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/empleados", "host": ["{{baseUrl}}"], "path": ["api","empleados"] }
+          }
+        },
+        {
+          "name": "Consultar empleado",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/empleados/1", "host": ["{{baseUrl}}"], "path": ["api","empleados","1"] }
+          }
+        },
+        {
+          "name": "Registrar empleado",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/empleados", "host": ["{{baseUrl}}"], "path": ["api","empleados"] },
+            "body": { "mode": "raw", "raw": "{\n  \"Documento\": \"11223344\",\n  \"Nombre\": \"Carlos López\",\n  \"Id_TipoDoc\": 1,\n  \"Id_Rol\": 2,\n  \"Correo\": \"carlos@sigot.com\",\n  \"Password\": \"Clave123!\"\n}" }
+          }
+        },
+        {
+          "name": "Editar empleado",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/empleados/2", "host": ["{{baseUrl}}"], "path": ["api","empleados","2"] },
+            "body": { "mode": "raw", "raw": "{\n  \"Nombre\": \"Carlos Alberto López\",\n  \"Telefono\": \"3115556677\"\n}" }
+          }
+        },
+        {
+          "name": "Cambiar estado empleado",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/empleados/2/estado", "host": ["{{baseUrl}}"], "path": ["api","empleados","2","estado"] },
+            "body": { "mode": "raw", "raw": "{\n  \"Estado\": false\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categorías de Repuestos",
+      "item": [
+        {
+          "name": "Listar categorías",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/categoria-repuestos", "host": ["{{baseUrl}}"], "path": ["api","categoria-repuestos"] }
+          }
+        },
+        {
+          "name": "Consultar categoría",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/categoria-repuestos/1", "host": ["{{baseUrl}}"], "path": ["api","categoria-repuestos","1"] }
+          }
+        },
+        {
+          "name": "Registrar categoría",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/categoria-repuestos", "host": ["{{baseUrl}}"], "path": ["api","categoria-repuestos"] },
+            "body": { "mode": "raw", "raw": "{\n  \"Nombre\": \"Frenos\",\n  \"Descripcion\": \"Sistemas de frenado\"\n}" }
+          }
+        },
+        {
+          "name": "Editar categoría",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/categoria-repuestos/1", "host": ["{{baseUrl}}"], "path": ["api","categoria-repuestos","1"] },
+            "body": { "mode": "raw", "raw": "{\n  \"Nombre\": \"Frenos y suspensión\",\n  \"Descripcion\": \"Sistemas de frenado y suspensión\"\n}" }
+          }
+        },
+        {
+          "name": "Cambiar estado categoría",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/categoria-repuestos/1/estado", "host": ["{{baseUrl}}"], "path": ["api","categoria-repuestos","1","estado"] },
+            "body": { "mode": "raw", "raw": "{\n  \"Estado\": false\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Repuestos",
+      "item": [
+        {
+          "name": "Listar repuestos",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/repuestos", "host": ["{{baseUrl}}"], "path": ["api","repuestos"] }
+          }
+        },
+        {
+          "name": "Ver stock",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/repuestos/stock", "host": ["{{baseUrl}}"], "path": ["api","repuestos","stock"] }
+          }
+        },
+        {
+          "name": "Consultar repuesto",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/repuestos/1", "host": ["{{baseUrl}}"], "path": ["api","repuestos","1"] }
+          }
+        },
+        {
+          "name": "Registrar repuesto",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/repuestos", "host": ["{{baseUrl}}"], "path": ["api","repuestos"] },
+            "body": { "mode": "raw", "raw": "{\n  \"Nombre\": \"Pastillas de freno\",\n  \"Referencia\": \"PF-001\",\n  \"Id_Categoria\": 1,\n  \"PrecioUnitario\": 45000,\n  \"Stock\": 20,\n  \"StockMinimo\": 5\n}" }
+          }
+        },
+        {
+          "name": "Editar repuesto",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/repuestos/1", "host": ["{{baseUrl}}"], "path": ["api","repuestos","1"] },
+            "body": { "mode": "raw", "raw": "{\n  \"PrecioUnitario\": 48000,\n  \"StockMinimo\": 8\n}" }
+          }
+        },
+        {
+          "name": "Cambiar estado repuesto",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/repuestos/1/estado", "host": ["{{baseUrl}}"], "path": ["api","repuestos","1","estado"] },
+            "body": { "mode": "raw", "raw": "{\n  \"Estado\": false\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Proveedores",
+      "item": [
+        {
+          "name": "Listar proveedores",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/proveedores", "host": ["{{baseUrl}}"], "path": ["api","proveedores"] }
+          }
+        },
+        {
+          "name": "Consultar proveedor",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/proveedores/1", "host": ["{{baseUrl}}"], "path": ["api","proveedores","1"] }
+          }
+        },
+        {
+          "name": "Registrar proveedor",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/proveedores", "host": ["{{baseUrl}}"], "path": ["api","proveedores"] },
+            "body": { "mode": "raw", "raw": "{\n  \"Nombre\": \"Autopartes S.A.\",\n  \"Nit\": \"900123456-1\",\n  \"Telefono\": \"6012345678\",\n  \"Correo\": \"ventas@autopartes.com\",\n  \"Direccion\": \"Carrera 50 # 30-10\"\n}" }
+          }
+        },
+        {
+          "name": "Editar proveedor",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/proveedores/1", "host": ["{{baseUrl}}"], "path": ["api","proveedores","1"] },
+            "body": { "mode": "raw", "raw": "{\n  \"Telefono\": \"3106667788\",\n  \"Correo\": \"info@autopartes.com\"\n}" }
+          }
+        },
+        {
+          "name": "Cambiar estado proveedor",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/proveedores/1/estado", "host": ["{{baseUrl}}"], "path": ["api","proveedores","1","estado"] },
+            "body": { "mode": "raw", "raw": "{\n  \"Estado\": false\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Compras",
+      "item": [
+        {
+          "name": "Listar compras",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/compras", "host": ["{{baseUrl}}"], "path": ["api","compras"] }
+          }
+        },
+        {
+          "name": "Consultar compra",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/compras/1", "host": ["{{baseUrl}}"], "path": ["api","compras","1"] }
+          }
+        },
+        {
+          "name": "Registrar compra",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/compras", "host": ["{{baseUrl}}"], "path": ["api","compras"] },
+            "body": { "mode": "raw", "raw": "{\n  \"Id_Proveedor\": 1,\n  \"Observaciones\": \"Compra de frenos\",\n  \"detalles\": [\n    { \"Id_Repuesto\": 1, \"Cantidad\": 10, \"PrecioUnitario\": 40000 }\n  ]\n}" }
+          }
+        },
+        {
+          "name": "Anular compra",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/compras/1/estado", "host": ["{{baseUrl}}"], "path": ["api","compras","1","estado"] },
+            "body": { "mode": "raw", "raw": "{\n  \"Estado\": false\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Servicios",
+      "item": [
+        {
+          "name": "Listar servicios",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/servicios", "host": ["{{baseUrl}}"], "path": ["api","servicios"] }
+          }
+        },
+        {
+          "name": "Consultar servicio",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/servicios/1", "host": ["{{baseUrl}}"], "path": ["api","servicios","1"] }
+          }
+        },
+        {
+          "name": "Registrar servicio",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/servicios", "host": ["{{baseUrl}}"], "path": ["api","servicios"] },
+            "body": { "mode": "raw", "raw": "{\n  \"Nombre\": \"Cambio de aceite\",\n  \"Descripcion\": \"Cambio de aceite de motor\",\n  \"Precio\": 35000\n}" }
+          }
+        },
+        {
+          "name": "Editar servicio",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/servicios/1", "host": ["{{baseUrl}}"], "path": ["api","servicios","1"] },
+            "body": { "mode": "raw", "raw": "{\n  \"Precio\": 38000\n}" }
+          }
+        },
+        {
+          "name": "Cambiar estado servicio",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/servicios/1/estado", "host": ["{{baseUrl}}"], "path": ["api","servicios","1","estado"] },
+            "body": { "mode": "raw", "raw": "{\n  \"Estado\": false\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Agenda",
+      "item": [
+        {
+          "name": "Listar agenda",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/agenda", "host": ["{{baseUrl}}"], "path": ["api","agenda"] }
+          }
+        },
+        {
+          "name": "Consultar cita",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/agenda/1", "host": ["{{baseUrl}}"], "path": ["api","agenda","1"] }
+          }
+        },
+        {
+          "name": "Registrar cita",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/agenda", "host": ["{{baseUrl}}"], "path": ["api","agenda"] },
+            "body": { "mode": "raw", "raw": "{\n  \"Id_Vehiculo\": 1,\n  \"Id_Empleado\": 1,\n  \"FechaHora\": \"2026-04-01T09:00:00\",\n  \"Motivo\": \"Revisión general\",\n  \"Observaciones\": \"Cliente solicita revisión de frenos\"\n}" }
+          }
+        },
+        {
+          "name": "Editar cita",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/agenda/1", "host": ["{{baseUrl}}"], "path": ["api","agenda","1"] },
+            "body": { "mode": "raw", "raw": "{\n  \"FechaHora\": \"2026-04-02T10:00:00\",\n  \"Observaciones\": \"Reprogramada por el cliente\"\n}" }
+          }
+        },
+        {
+          "name": "Cambiar estado cita",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/agenda/1/estado", "host": ["{{baseUrl}}"], "path": ["api","agenda","1","estado"] },
+            "body": { "mode": "raw", "raw": "{\n  \"Estado\": false\n}" }
+          }
+        },
+        {
+          "name": "Generar orden desde cita",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/agenda/1/orden", "host": ["{{baseUrl}}"], "path": ["api","agenda","1","orden"] },
+            "body": { "mode": "raw", "raw": "{}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Órdenes de Trabajo",
+      "item": [
+        {
+          "name": "Listar órdenes",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/ordenes", "host": ["{{baseUrl}}"], "path": ["api","ordenes"] }
+          }
+        },
+        {
+          "name": "Consultar orden",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/ordenes/1", "host": ["{{baseUrl}}"], "path": ["api","ordenes","1"] }
+          }
+        },
+        {
+          "name": "Editar orden",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/ordenes/1", "host": ["{{baseUrl}}"], "path": ["api","ordenes","1"] },
+            "body": { "mode": "raw", "raw": "{\n  \"Observaciones\": \"Se revisaron frenos y suspensión\"\n}" }
+          }
+        },
+        {
+          "name": "Cambiar estado orden",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/ordenes/1/estado", "host": ["{{baseUrl}}"], "path": ["api","ordenes","1","estado"] },
+            "body": { "mode": "raw", "raw": "{\n  \"Estado\": \"Terminada\"\n}" }
+          }
+        },
+        {
+          "name": "Agregar servicio a orden",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/ordenes/1/servicios", "host": ["{{baseUrl}}"], "path": ["api","ordenes","1","servicios"] },
+            "body": { "mode": "raw", "raw": "{\n  \"Id_Servicio\": 1,\n  \"Cantidad\": 1,\n  \"PrecioUnitario\": 35000\n}" }
+          }
+        },
+        {
+          "name": "Agregar repuesto a orden",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/ordenes/1/repuestos", "host": ["{{baseUrl}}"], "path": ["api","ordenes","1","repuestos"] },
+            "body": { "mode": "raw", "raw": "{\n  \"Id_Repuesto\": 1,\n  \"Cantidad\": 2,\n  \"PrecioUnitario\": 45000\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Novedades",
+      "item": [
+        {
+          "name": "Listar novedades",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/novedades", "host": ["{{baseUrl}}"], "path": ["api","novedades"] }
+          }
+        },
+        {
+          "name": "Consultar novedad",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/novedades/1", "host": ["{{baseUrl}}"], "path": ["api","novedades","1"] }
+          }
+        },
+        {
+          "name": "Registrar novedad",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/novedades", "host": ["{{baseUrl}}"], "path": ["api","novedades"] },
+            "body": { "mode": "raw", "raw": "{\n  \"Id_Orden\": 1,\n  \"Id_Empleado\": 1,\n  \"Descripcion\": \"Se encontró desgaste en pastillas traseras\"\n}" }
+          }
+        },
+        {
+          "name": "Editar novedad",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/novedades/1", "host": ["{{baseUrl}}"], "path": ["api","novedades","1"] },
+            "body": { "mode": "raw", "raw": "{\n  \"Descripcion\": \"Desgaste crítico en pastillas traseras, se reemplazaron\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Stock de repuestos",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/dashboard/repuestos", "host": ["{{baseUrl}}"], "path": ["api","dashboard","repuestos"] }
+          }
+        },
+        {
+          "name": "Resumen de compras",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/dashboard/compras", "host": ["{{baseUrl}}"], "path": ["api","dashboard","compras"] }
+          }
+        },
+        {
+          "name": "Resumen de servicios",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/dashboard/servicios", "host": ["{{baseUrl}}"], "path": ["api","dashboard","servicios"] }
+          }
+        },
+        {
+          "name": "Resumen de empleados",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/dashboard/empleados", "host": ["{{baseUrl}}"], "path": ["api","dashboard","empleados"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Catálogos (públicos)",
+      "item": [
+        {
+          "name": "Tipos de documento",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/catalogos/tipos-documento", "host": ["{{baseUrl}}"], "path": ["api","catalogos","tipos-documento"] }
+          }
+        },
+        {
+          "name": "Marcas de vehículo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/catalogos/marcas", "host": ["{{baseUrl}}"], "path": ["api","catalogos","marcas"] }
+          }
+        }
+      ]
+    }
+  ]
+}

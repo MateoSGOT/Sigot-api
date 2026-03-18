@@ -2,7 +2,7 @@ services:
   - type: web
     name: sigot-api
     runtime: node
-    buildCommand: npm install --ignore-scripts && npx prisma generate && npx prisma migrate deploy
+    buildCommand: npm install --ignore-scripts && npx prisma generate && npx prisma migrate deploy && node prisma/seed.js
     startCommand: node src/server.js
     envVars:
       - key: NODE_ENV

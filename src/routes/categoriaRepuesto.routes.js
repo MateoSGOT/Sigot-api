@@ -1,15 +1,14 @@
 const { Router } = require('express');
 const categoriaRepuestoController = require('../controllers/categoriaRepuesto.controller');
 const { authenticate } = require('../middlewares/auth');
+const { checkPermiso } = require('../middlewares/checkPermiso');
 
 const router = Router();
 
-router.use(authenticate);
-
-router.get('/',             categoriaRepuestoController.getAll);
-router.get('/:id',          categoriaRepuestoController.getById);
-router.post('/',            categoriaRepuestoController.create);
-router.put('/:id',          categoriaRepuestoController.update);
-router.patch('/:id/estado', categoriaRepuestoController.patchEstado);
+router.get('/',             authenticate, checkPermiso('CATEGORIAS.LISTAR'),        categoriaRepuestoController.getAll);
+router.get('/:id',          authenticate, checkPermiso('CATEGORIAS.CONSULTAR'),     categoriaRepuestoController.getById);
+router.post('/',            authenticate, checkPermiso('CATEGORIAS.REGISTRAR'),     categoriaRepuestoController.create);
+router.put('/:id',          authenticate, checkPermiso('CATEGORIAS.EDITAR'),        categoriaRepuestoController.update);
+router.patch('/:id/estado', authenticate, checkPermiso('CATEGORIAS.CAMBIAR_ESTADO'), categoriaRepuestoController.patchEstado);
 
 module.exports = router;
