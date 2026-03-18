@@ -1,0 +1,71 @@
+const ordenService = require('../services/orden.service');
+const { updateSchema, addServicioSchema, addRepuestoSchema } = require('../validators/orden.validator');
+const { BadRequestError } = require('../errors/httpErrors');
+
+const getAll = async (req, res, next) => {
+  try {
+    const ordenes = await ordenService.getAll();
+    res.json({ status: 'ok', data: ordenes });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const getById = async (req, res, next) => {
+  try {
+    const orden = await ordenService.getById(Number(req.params.id));
+    res.json({ status: 'ok', data: orden });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const update = async (req, res, next) => {
+  try {
+    const { error, value } = updateSchema.validate(req.body);
+    if (error) throw new BadRequestError(error.details[0].message);
+
+    const orden = await ordenService.update(Number(req.params.id), value);
+    res.json({ status: 'ok', data: orden });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const patchEstado = async (req, res, next) => {
+  try {
+    const { Estado } = req.body;
+    if (Estado === undefined) throw new BadRequestError('El campo Estado es obligatorio');
+
+    const orden = await ordenService.toggleEstado(Number(req.params.id), Estado);
+    res.json({ status: 'ok', data: orden });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const addServicio = async (req, res, next) => {
+  try {
+    const { error, value } = addServicioSchema.validate(req.body);
+    if (error) throw new BadRequestError(error.details[0].message);
+
+    const detalle = await ordenService.addServicio(Number(req.params.id), value);
+    res.status(201).json({ status: 'ok', data: detalle });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const addRepuesto = async (req, res, next) => {
+  try {
+    const { error, value } = addRepuestoSchema.validate(req.body);
+    if (error) throw new BadRequestError(error.details[0].message);
+
+    const detalle = await ordenService.addRepuesto(Number(req.params.id), value);
+    res.status(201).json({ status: 'ok', data: detalle });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { getAll, getById, update, patchEstado, addServicio, addRepuesto };

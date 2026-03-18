@@ -1,0 +1,819 @@
+{
+  "info": {
+    "name": "SIGOT API",
+    "description": "Colección completa de endpoints para el sistema de taller mecánico SIGOT",
+    "_postman_id": "sigot-api-collection-v1",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:3000", "type": "string" },
+    { "key": "token",    "value": "",                      "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/health", "host": ["{{base_url}}"], "path": ["health"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.token) {",
+                  "  pm.collectionVariables.set('token', res.data.token);",
+                  "  console.log('Token guardado correctamente');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Correo\": \"admin@sigot.com\",\n  \"Password\": \"12345678\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/auth/login", "host": ["{{base_url}}"], "path": ["api", "auth", "login"] }
+          }
+        },
+        {
+          "name": "Registro",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Documento\": \"1234567890\",\n  \"Nombre\": \"Admin SIGOT\",\n  \"Id_TipoDoc\": 1,\n  \"Id_Rol\": 1,\n  \"Correo\": \"admin@sigot.com\",\n  \"Password\": \"12345678\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/auth/registro", "host": ["{{base_url}}"], "path": ["api", "auth", "registro"] }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/auth/logout", "host": ["{{base_url}}"], "path": ["api", "auth", "logout"] }
+          }
+        },
+        {
+          "name": "Recuperar Password",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Correo\": \"admin@sigot.com\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/auth/recuperar-password", "host": ["{{base_url}}"], "path": ["api", "auth", "recuperar-password"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Roles",
+      "item": [
+        {
+          "name": "Listar Roles",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/roles", "host": ["{{base_url}}"], "path": ["api", "roles"] }
+          }
+        },
+        {
+          "name": "Obtener Rol",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/roles/1", "host": ["{{base_url}}"], "path": ["api", "roles", "1"] }
+          }
+        },
+        {
+          "name": "Crear Rol",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Nombre\": \"Mecánico\",\n  \"Descripcion\": \"Técnico de taller\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/roles", "host": ["{{base_url}}"], "path": ["api", "roles"] }
+          }
+        },
+        {
+          "name": "Actualizar Rol",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Nombre\": \"Mecánico Senior\",\n  \"Descripcion\": \"Técnico senior de taller\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/roles/1", "host": ["{{base_url}}"], "path": ["api", "roles", "1"] }
+          }
+        },
+        {
+          "name": "Cambiar Estado Rol",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Estado\": 0\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/roles/1/estado", "host": ["{{base_url}}"], "path": ["api", "roles", "1", "estado"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Clientes",
+      "item": [
+        {
+          "name": "Listar Clientes",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/clientes", "host": ["{{base_url}}"], "path": ["api", "clientes"] }
+          }
+        },
+        {
+          "name": "Obtener Cliente",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/clientes/1", "host": ["{{base_url}}"], "path": ["api", "clientes", "1"] }
+          }
+        },
+        {
+          "name": "Crear Cliente",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Documento\": \"987654321\",\n  \"Nombre\": \"Juan Pérez\",\n  \"Id_TipoDoc\": 1,\n  \"Correo\": \"juan@correo.com\",\n  \"Contacto\": \"3001234567\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/clientes", "host": ["{{base_url}}"], "path": ["api", "clientes"] }
+          }
+        },
+        {
+          "name": "Actualizar Cliente",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Nombre\": \"Juan Pérez García\",\n  \"Contacto\": \"3009876543\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/clientes/1", "host": ["{{base_url}}"], "path": ["api", "clientes", "1"] }
+          }
+        },
+        {
+          "name": "Cambiar Estado Cliente",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Estado\": 0\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/clientes/1/estado", "host": ["{{base_url}}"], "path": ["api", "clientes", "1", "estado"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Vehículos",
+      "item": [
+        {
+          "name": "Listar Vehículos",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/vehiculos", "host": ["{{base_url}}"], "path": ["api", "vehiculos"] }
+          }
+        },
+        {
+          "name": "Obtener Vehículo",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/vehiculos/1", "host": ["{{base_url}}"], "path": ["api", "vehiculos", "1"] }
+          }
+        },
+        {
+          "name": "Crear Vehículo",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Placa\": \"ABC123\",\n  \"VIN\": \"1HGCM82633A123456\",\n  \"Id_Cliente\": 1,\n  \"Id_Marca\": 1,\n  \"Modelo\": \"Civic\",\n  \"Año\": 2020,\n  \"Color\": \"Rojo\",\n  \"NumeroEjes\": 2\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/vehiculos", "host": ["{{base_url}}"], "path": ["api", "vehiculos"] }
+          }
+        },
+        {
+          "name": "Actualizar Vehículo",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Color\": \"Azul\",\n  \"Modelo\": \"Civic EX\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/vehiculos/1", "host": ["{{base_url}}"], "path": ["api", "vehiculos", "1"] }
+          }
+        },
+        {
+          "name": "Cambiar Estado Vehículo",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Estado\": 0\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/vehiculos/1/estado", "host": ["{{base_url}}"], "path": ["api", "vehiculos", "1", "estado"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Empleados",
+      "item": [
+        {
+          "name": "Listar Empleados",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/empleados", "host": ["{{base_url}}"], "path": ["api", "empleados"] }
+          }
+        },
+        {
+          "name": "Obtener Empleado",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/empleados/1", "host": ["{{base_url}}"], "path": ["api", "empleados", "1"] }
+          }
+        },
+        {
+          "name": "Crear Empleado",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Documento\": \"112233445\",\n  \"Nombre\": \"Carlos Méndez\",\n  \"Id_TipoDoc\": 1,\n  \"Id_Rol\": 2,\n  \"Correo\": \"carlos@sigot.com\",\n  \"Password\": \"mecanic01\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/empleados", "host": ["{{base_url}}"], "path": ["api", "empleados"] }
+          }
+        },
+        {
+          "name": "Actualizar Empleado",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Nombre\": \"Carlos Méndez López\",\n  \"Id_Rol\": 3\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/empleados/1", "host": ["{{base_url}}"], "path": ["api", "empleados", "1"] }
+          }
+        },
+        {
+          "name": "Cambiar Estado Empleado",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Estado\": 0\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/empleados/1/estado", "host": ["{{base_url}}"], "path": ["api", "empleados", "1", "estado"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categorías de Repuesto",
+      "item": [
+        {
+          "name": "Listar Categorías",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/categoria-repuestos", "host": ["{{base_url}}"], "path": ["api", "categoria-repuestos"] }
+          }
+        },
+        {
+          "name": "Obtener Categoría",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/categoria-repuestos/1", "host": ["{{base_url}}"], "path": ["api", "categoria-repuestos", "1"] }
+          }
+        },
+        {
+          "name": "Crear Categoría",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Nombre\": \"Filtros\",\n  \"Descripcion\": \"Filtros de aceite, aire y combustible\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/categoria-repuestos", "host": ["{{base_url}}"], "path": ["api", "categoria-repuestos"] }
+          }
+        },
+        {
+          "name": "Actualizar Categoría",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Nombre\": \"Filtros y Aceites\",\n  \"Descripcion\": \"Filtros de aceite, aire, combustible y lubricantes\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/categoria-repuestos/1", "host": ["{{base_url}}"], "path": ["api", "categoria-repuestos", "1"] }
+          }
+        },
+        {
+          "name": "Cambiar Estado Categoría",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Estado\": 0\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/categoria-repuestos/1/estado", "host": ["{{base_url}}"], "path": ["api", "categoria-repuestos", "1", "estado"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Repuestos",
+      "item": [
+        {
+          "name": "Listar Repuestos",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/repuestos", "host": ["{{base_url}}"], "path": ["api", "repuestos"] }
+          }
+        },
+        {
+          "name": "Stock de Repuestos",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/repuestos/stock", "host": ["{{base_url}}"], "path": ["api", "repuestos", "stock"] }
+          }
+        },
+        {
+          "name": "Obtener Repuesto",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/repuestos/1", "host": ["{{base_url}}"], "path": ["api", "repuestos", "1"] }
+          }
+        },
+        {
+          "name": "Crear Repuesto",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"NombreRepuesto\": \"Filtro de aceite\",\n  \"Stock\": 10,\n  \"Precio\": 25000,\n  \"Id_categoria\": 1\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/repuestos", "host": ["{{base_url}}"], "path": ["api", "repuestos"] }
+          }
+        },
+        {
+          "name": "Actualizar Repuesto",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Precio\": 27000,\n  \"Stock\": 15\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/repuestos/1", "host": ["{{base_url}}"], "path": ["api", "repuestos", "1"] }
+          }
+        },
+        {
+          "name": "Cambiar Estado Repuesto",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Estado\": 0\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/repuestos/1/estado", "host": ["{{base_url}}"], "path": ["api", "repuestos", "1", "estado"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Proveedores",
+      "item": [
+        {
+          "name": "Listar Proveedores",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/proveedores", "host": ["{{base_url}}"], "path": ["api", "proveedores"] }
+          }
+        },
+        {
+          "name": "Obtener Proveedor",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/proveedores/1", "host": ["{{base_url}}"], "path": ["api", "proveedores", "1"] }
+          }
+        },
+        {
+          "name": "Crear Proveedor",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Documento\": \"900123456\",\n  \"TipoProveedor\": \"Juridico\",\n  \"nombre\": \"Repuestos El Motor S.A.S\",\n  \"correo\": \"ventas@elmotor.com\",\n  \"contacto\": \"3201234567\",\n  \"ciudad\": \"Bogotá\",\n  \"direccion\": \"Cra 30 # 45-60\",\n  \"detalles\": \"Proveedor principal de filtros\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/proveedores", "host": ["{{base_url}}"], "path": ["api", "proveedores"] }
+          }
+        },
+        {
+          "name": "Actualizar Proveedor",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ciudad\": \"Medellín\",\n  \"contacto\": \"3109876543\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/proveedores/1", "host": ["{{base_url}}"], "path": ["api", "proveedores", "1"] }
+          }
+        },
+        {
+          "name": "Cambiar Estado Proveedor",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Estado\": 0\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/proveedores/1/estado", "host": ["{{base_url}}"], "path": ["api", "proveedores", "1", "estado"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Compras",
+      "item": [
+        {
+          "name": "Listar Compras",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/compras", "host": ["{{base_url}}"], "path": ["api", "compras"] }
+          }
+        },
+        {
+          "name": "Obtener Compra",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/compras/1", "host": ["{{base_url}}"], "path": ["api", "compras", "1"] }
+          }
+        },
+        {
+          "name": "Crear Compra",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Fecha_compra\": \"2026-03-16\",\n  \"id_proveedor\": 1,\n  \"detalles\": [\n    {\n      \"Id_Repuesto\": 1,\n      \"cantidad\": 5,\n      \"valor_unidad\": 22000\n    },\n    {\n      \"Id_Repuesto\": 2,\n      \"cantidad\": 3,\n      \"valor_unidad\": 45000\n    }\n  ]\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/compras", "host": ["{{base_url}}"], "path": ["api", "compras"] }
+          }
+        },
+        {
+          "name": "Cambiar Estado Compra",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Estado\": 0\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/compras/1/estado", "host": ["{{base_url}}"], "path": ["api", "compras", "1", "estado"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Servicios",
+      "item": [
+        {
+          "name": "Listar Servicios",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/servicios", "host": ["{{base_url}}"], "path": ["api", "servicios"] }
+          }
+        },
+        {
+          "name": "Obtener Servicio",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/servicios/1", "host": ["{{base_url}}"], "path": ["api", "servicios", "1"] }
+          }
+        },
+        {
+          "name": "Crear Servicio",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Nombre\": \"Cambio de aceite\",\n  \"Descripcion\": \"Cambio de aceite de motor y filtro\",\n  \"Precio\": 80000\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/servicios", "host": ["{{base_url}}"], "path": ["api", "servicios"] }
+          }
+        },
+        {
+          "name": "Actualizar Servicio",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Precio\": 90000,\n  \"Descripcion\": \"Cambio de aceite sintético de motor y filtro\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/servicios/1", "host": ["{{base_url}}"], "path": ["api", "servicios", "1"] }
+          }
+        },
+        {
+          "name": "Cambiar Estado Servicio",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Estado\": 0\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/servicios/1/estado", "host": ["{{base_url}}"], "path": ["api", "servicios", "1", "estado"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Agenda",
+      "item": [
+        {
+          "name": "Listar Agenda",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/agenda", "host": ["{{base_url}}"], "path": ["api", "agenda"] }
+          }
+        },
+        {
+          "name": "Obtener Cita",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/agenda/1", "host": ["{{base_url}}"], "path": ["api", "agenda", "1"] }
+          }
+        },
+        {
+          "name": "Crear Cita",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Id_Cliente\": 1,\n  \"Id_Vehiculo\": 1,\n  \"id_empleado\": 1,\n  \"FechaAgendamiento\": \"2026-03-20\",\n  \"Hora\": \"09:00\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/agenda", "host": ["{{base_url}}"], "path": ["api", "agenda"] }
+          }
+        },
+        {
+          "name": "Actualizar Cita",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"FechaAgendamiento\": \"2026-03-22\",\n  \"Hora\": \"10:30\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/agenda/1", "host": ["{{base_url}}"], "path": ["api", "agenda", "1"] }
+          }
+        },
+        {
+          "name": "Cambiar Estado Cita",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Estado\": 0\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/agenda/1/estado", "host": ["{{base_url}}"], "path": ["api", "agenda", "1", "estado"] }
+          }
+        },
+        {
+          "name": "Generar Orden desde Cita",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"FechaIngreso\": \"2026-03-20\",\n  \"FechaEntrega\": \"2026-03-21\",\n  \"Diagnostico\": \"Cambio de aceite preventivo\",\n  \"Kilometraje\": 45000\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/agenda/1/orden", "host": ["{{base_url}}"], "path": ["api", "agenda", "1", "orden"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Órdenes de Trabajo",
+      "item": [
+        {
+          "name": "Listar Órdenes",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/ordenes", "host": ["{{base_url}}"], "path": ["api", "ordenes"] }
+          }
+        },
+        {
+          "name": "Obtener Orden",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/ordenes/1", "host": ["{{base_url}}"], "path": ["api", "ordenes", "1"] }
+          }
+        },
+        {
+          "name": "Actualizar Orden",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Diagnostico\": \"Cambio de aceite y revisión de frenos\",\n  \"Kilometraje\": 45200,\n  \"FechaEntrega\": \"2026-03-22\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/ordenes/1", "host": ["{{base_url}}"], "path": ["api", "ordenes", "1"] }
+          }
+        },
+        {
+          "name": "Cambiar Estado Orden",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Estado\": 0\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/ordenes/1/estado", "host": ["{{base_url}}"], "path": ["api", "ordenes", "1", "estado"] }
+          }
+        },
+        {
+          "name": "Agregar Servicio a Orden",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Id_Servicio\": 1,\n  \"precio_unitario\": 80000\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/ordenes/1/servicios", "host": ["{{base_url}}"], "path": ["api", "ordenes", "1", "servicios"] }
+          }
+        },
+        {
+          "name": "Agregar Repuesto a Orden",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Id_Repuesto\": 1,\n  \"cantidad\": 1,\n  \"precio_unitario\": 25000\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/ordenes/1/repuestos", "host": ["{{base_url}}"], "path": ["api", "ordenes", "1", "repuestos"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Novedades",
+      "item": [
+        {
+          "name": "Listar Novedades",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/novedades", "host": ["{{base_url}}"], "path": ["api", "novedades"] }
+          }
+        },
+        {
+          "name": "Obtener Novedad",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/novedades/1", "host": ["{{base_url}}"], "path": ["api", "novedades", "1"] }
+          }
+        },
+        {
+          "name": "Crear Novedad",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_empleado\": 1,\n  \"Descripcion\": \"Permiso médico por cita odontológica\",\n  \"Fecha_Novedad\": \"2026-03-16\",\n  \"FechaRealizacion\": \"2026-03-16\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/novedades", "host": ["{{base_url}}"], "path": ["api", "novedades"] }
+          }
+        },
+        {
+          "name": "Actualizar Novedad",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Descripcion\": \"Incapacidad médica por 2 días\",\n  \"FechaRealizacion\": \"2026-03-17\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/novedades/1", "host": ["{{base_url}}"], "path": ["api", "novedades", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Dashboard - Repuestos",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/dashboard/repuestos", "host": ["{{base_url}}"], "path": ["api", "dashboard", "repuestos"] }
+          }
+        },
+        {
+          "name": "Dashboard - Compras",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/dashboard/compras", "host": ["{{base_url}}"], "path": ["api", "dashboard", "compras"] }
+          }
+        },
+        {
+          "name": "Dashboard - Servicios",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/dashboard/servicios", "host": ["{{base_url}}"], "path": ["api", "dashboard", "servicios"] }
+          }
+        },
+        {
+          "name": "Dashboard - Empleados",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/dashboard/empleados", "host": ["{{base_url}}"], "path": ["api", "dashboard", "empleados"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Catálogos",
+      "item": [
+        {
+          "name": "Tipos de Documento",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/catalogos/tipos-documento", "host": ["{{base_url}}"], "path": ["api", "catalogos", "tipos-documento"] }
+          }
+        },
+        {
+          "name": "Marcas de Vehículo",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/catalogos/marcas", "host": ["{{base_url}}"], "path": ["api", "catalogos", "marcas"] }
+          }
+        }
+      ]
+    }
+  ]
+}
