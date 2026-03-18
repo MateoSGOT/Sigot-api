@@ -1,95 +1,77 @@
-const { getPool, sql } = require('../config/db');
+const { prisma } = require('../config/db');
+
+const _fmt = ({ categoria, ...r }) => ({ ...r, Categoria: categoria.Nombre });
+
+const _include = { categoria: { select: { Nombre: true } } };
 
 const findAll = async () => {
-  const pool = getPool();
-  const result = await pool.request()
-    .query(`
-      SELECT r.Id_Repuesto, r.NombreRepuesto, r.Stock, r.Precio, r.Estado,
-             r.Id_categoria, c.Nombre AS Categoria
-      FROM Repuestos r
-      INNER JOIN CategoriaRepuestos c ON r.Id_categoria = c.Id_categoria
-      WHERE r.Estado = 1
-    `);
-  return result.recordset;
+  const rows = await prisma.repuestos.findMany({
+    where: { Estado: true },
+    include: _include,
+  });
+  return rows.map(_fmt);
 };
 
 const findById = async (id) => {
-  const pool = getPool();
-  const result = await pool.request()
-    .input('id', sql.Int, id)
-    .query(`
-      SELECT r.Id_Repuesto, r.NombreRepuesto, r.Stock, r.Precio, r.Estado,
-             r.Id_categoria, c.Nombre AS Categoria
-      FROM Repuestos r
-      INNER JOIN CategoriaRepuestos c ON r.Id_categoria = c.Id_categoria
-      WHERE r.Id_Repuesto = @id
-    `);
-  return result.recordset[0] || null;
+  const row = await prisma.repuestos.findUnique({
+    where: { Id_Repuesto: id },
+    include: _include,
+  });
+  return row ? _fmt(row) : null;
 };
 
 const findStock = async () => {
-  const pool = getPool();
-  const result = await pool.request()
-    .query(`
-      SELECT r.Id_Repuesto, r.NombreRepuesto, r.Stock, r.Precio,
-             r.Id_categoria, c.Nombre AS Categoria
-      FROM Repuestos r
-      INNER JOIN CategoriaRepuestos c ON r.Id_categoria = c.Id_categoria
-      WHERE r.Estado = 1
-      ORDER BY r.Stock ASC
-    `);
-  return result.recordset;
+  const rows = await prisma.repuestos.findMany({
+    where: { Estado: true },
+    include: _include,
+    orderBy: { Stock: 'asc' },
+  });
+  return rows.map(_fmt);
 };
 
 const create = async ({ NombreRepuesto, Stock, Precio, Id_categoria }) => {
-  const pool = getPool();
-  const result = await pool.request()
-    .input('NombreRepuesto', sql.VarChar(120),    NombreRepuesto)
-    .input('Stock',          sql.Int,             Stock ?? 0)
-    .input('Precio',         sql.Decimal(10, 2),  Precio)
-    .input('Id_categoria',   sql.Int,             Id_categoria)
-    .query(`
-      INSERT INTO Repuestos (NombreRepuesto, Stock, Precio, Estado, Id_categoria)
-      OUTPUT INSERTED.Id_Repuesto, INSERTED.NombreRepuesto, INSERTED.Stock,
-             INSERTED.Precio, INSERTED.Estado, INSERTED.Id_categoria
-      VALUES (@NombreRepuesto, @Stock, @Precio, 1, @Id_categoria)
-    `);
-  return result.recordset[0];
+  const row = await prisma.repuestos.create({
+    data: {
+      NombreRepuesto,
+      Stock:       Stock ?? 0,
+      Precio,
+      Id_categoria,
+    },
+    include: _include,
+  });
+  return _fmt(row);
 };
 
 const update = async (id, { NombreRepuesto, Stock, Precio, Id_categoria }) => {
-  const pool = getPool();
-  const result = await pool.request()
-    .input('id',             sql.Int,            id)
-    .input('NombreRepuesto', sql.VarChar(120),   NombreRepuesto ?? null)
-    .input('Stock',          sql.Int,            Stock          ?? null)
-    .input('Precio',         sql.Decimal(10, 2), Precio         ?? null)
-    .input('Id_categoria',   sql.Int,            Id_categoria   ?? null)
-    .query(`
-      UPDATE Repuestos
-      SET NombreRepuesto = COALESCE(@NombreRepuesto, NombreRepuesto),
-          Stock          = COALESCE(@Stock,          Stock),
-          Precio         = COALESCE(@Precio,         Precio),
-          Id_categoria   = COALESCE(@Id_categoria,   Id_categoria)
-      OUTPUT INSERTED.Id_Repuesto, INSERTED.NombreRepuesto, INSERTED.Stock,
-             INSERTED.Precio, INSERTED.Estado, INSERTED.Id_categoria
-      WHERE Id_Repuesto = @id
-    `);
-  return result.recordset[0] || null;
+  const data = {};
+  if (NombreRepuesto != null) data.NombreRepuesto = NombreRepuesto;
+  if (Stock         != null) data.Stock          = Stock;
+  if (Precio        != null) data.Precio         = Precio;
+  if (Id_categoria  != null) data.Id_categoria   = Id_categoria;
+  try {
+    const row = await prisma.repuestos.update({
+      where: { Id_Repuesto: id },
+      data,
+      include: _include,
+    });
+    return _fmt(row);
+  } catch (e) {
+    if (e.code === 'P2025') return null;
+    throw e;
+  }
 };
 
 const toggleEstado = async (id, estado) => {
-  const pool = getPool();
-  const result = await pool.request()
-    .input('id',     sql.Int, id)
-    .input('Estado', sql.Bit, estado)
-    .query(`
-      UPDATE Repuestos
-      SET Estado = @Estado
-      OUTPUT INSERTED.Id_Repuesto, INSERTED.NombreRepuesto, INSERTED.Stock, INSERTED.Estado
-      WHERE Id_Repuesto = @id
-    `);
-  return result.recordset[0] || null;
+  try {
+    return await prisma.repuestos.update({
+      where: { Id_Repuesto: id },
+      data: { Estado: Boolean(estado) },
+      select: { Id_Repuesto: true, NombreRepuesto: true, Stock: true, Estado: true },
+    });
+  } catch (e) {
+    if (e.code === 'P2025') return null;
+    throw e;
+  }
 };
 
 module.exports = { findAll, findById, findStock, create, update, toggleEstado };

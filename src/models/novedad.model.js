@@ -1,67 +1,55 @@
-const { getPool, sql } = require('../config/db');
+const { prisma } = require('../config/db');
+
+const _fmt = ({ empleado, ...n }) => ({ ...n, empleado: empleado.Nombre });
+
+const _include = { empleado: { select: { Nombre: true } } };
 
 const findAll = async () => {
-  const pool = getPool();
-  const result = await pool.request()
-    .query(`
-      SELECT n.Id_Novedad, n.id_empleado, e.Nombre AS empleado,
-             n.Descripcion, n.Fecha_Novedad, n.FechaRealizacion
-      FROM Novedades n
-      JOIN Empleado e ON e.id_empleado = n.id_empleado
-      ORDER BY n.Id_Novedad DESC
-    `);
-  return result.recordset;
+  const rows = await prisma.novedades.findMany({
+    include: _include,
+    orderBy: { Id_Novedad: 'desc' },
+  });
+  return rows.map(_fmt);
 };
 
 const findById = async (id) => {
-  const pool = getPool();
-  const result = await pool.request()
-    .input('id', sql.Int, id)
-    .query(`
-      SELECT n.Id_Novedad, n.id_empleado, e.Nombre AS empleado,
-             n.Descripcion, n.Fecha_Novedad, n.FechaRealizacion
-      FROM Novedades n
-      JOIN Empleado e ON e.id_empleado = n.id_empleado
-      WHERE n.Id_Novedad = @id
-    `);
-  return result.recordset[0] || null;
+  const row = await prisma.novedades.findUnique({
+    where: { Id_Novedad: id },
+    include: _include,
+  });
+  return row ? _fmt(row) : null;
 };
 
 const create = async ({ id_empleado, Descripcion, Fecha_Novedad, FechaRealizacion }) => {
-  const pool = getPool();
-  const result = await pool.request()
-    .input('id_empleado',      sql.Int,          id_empleado)
-    .input('Descripcion',      sql.VarChar(500), Descripcion      || null)
-    .input('Fecha_Novedad',    sql.Date,         Fecha_Novedad    || null)
-    .input('FechaRealizacion', sql.Date,         FechaRealizacion || null)
-    .query(`
-      INSERT INTO Novedades (id_empleado, Descripcion, Fecha_Novedad, FechaRealizacion)
-      OUTPUT INSERTED.Id_Novedad, INSERTED.id_empleado, INSERTED.Descripcion,
-             INSERTED.Fecha_Novedad, INSERTED.FechaRealizacion
-      VALUES (@id_empleado, @Descripcion, @Fecha_Novedad, @FechaRealizacion)
-    `);
-  return result.recordset[0];
+  const row = await prisma.novedades.create({
+    data: {
+      id_empleado,
+      Descripcion:      Descripcion      || null,
+      Fecha_Novedad:    Fecha_Novedad    ? new Date(Fecha_Novedad)    : null,
+      FechaRealizacion: FechaRealizacion ? new Date(FechaRealizacion) : null,
+    },
+    include: _include,
+  });
+  return _fmt(row);
 };
 
 const update = async (id, { id_empleado, Descripcion, Fecha_Novedad, FechaRealizacion }) => {
-  const pool = getPool();
-  const result = await pool.request()
-    .input('id',               sql.Int,          id)
-    .input('id_empleado',      sql.Int,          id_empleado      ?? null)
-    .input('Descripcion',      sql.VarChar(500), Descripcion      || null)
-    .input('Fecha_Novedad',    sql.Date,         Fecha_Novedad    || null)
-    .input('FechaRealizacion', sql.Date,         FechaRealizacion || null)
-    .query(`
-      UPDATE Novedades
-      SET id_empleado      = COALESCE(@id_empleado,      id_empleado),
-          Descripcion      = COALESCE(@Descripcion,      Descripcion),
-          Fecha_Novedad    = COALESCE(@Fecha_Novedad,    Fecha_Novedad),
-          FechaRealizacion = COALESCE(@FechaRealizacion, FechaRealizacion)
-      OUTPUT INSERTED.Id_Novedad, INSERTED.id_empleado, INSERTED.Descripcion,
-             INSERTED.Fecha_Novedad, INSERTED.FechaRealizacion
-      WHERE Id_Novedad = @id
-    `);
-  return result.recordset[0] || null;
+  const data = {};
+  if (id_empleado      != null) data.id_empleado      = id_empleado;
+  if (Descripcion      != null) data.Descripcion      = Descripcion;
+  if (Fecha_Novedad    != null) data.Fecha_Novedad    = new Date(Fecha_Novedad);
+  if (FechaRealizacion != null) data.FechaRealizacion = new Date(FechaRealizacion);
+  try {
+    const row = await prisma.novedades.update({
+      where: { Id_Novedad: id },
+      data,
+      include: _include,
+    });
+    return _fmt(row);
+  } catch (e) {
+    if (e.code === 'P2025') return null;
+    throw e;
+  }
 };
 
 module.exports = { findAll, findById, create, update };

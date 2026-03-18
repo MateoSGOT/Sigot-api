@@ -1,81 +1,55 @@
-const { getPool, sql } = require('../config/db');
+const { prisma } = require('../config/db');
 
 const findAll = async () => {
-  const pool = getPool();
-  const result = await pool.request()
-    .query(`
-      SELECT Id_categoria, Nombre, Descripcion, Estado
-      FROM CategoriaRepuestos
-      WHERE Estado = 1
-    `);
-  return result.recordset;
+  return prisma.categoriaRepuestos.findMany({ where: { Estado: true } });
 };
 
 const findById = async (id) => {
-  const pool = getPool();
-  const result = await pool.request()
-    .input('id', sql.Int, id)
-    .query(`
-      SELECT Id_categoria, Nombre, Descripcion, Estado
-      FROM CategoriaRepuestos
-      WHERE Id_categoria = @id
-    `);
-  return result.recordset[0] || null;
+  return prisma.categoriaRepuestos.findUnique({ where: { Id_categoria: id } });
 };
 
 const findByNombre = async (nombre, excludeId = null) => {
-  const pool = getPool();
-  const req = pool.request().input('Nombre', sql.VarChar(60), nombre);
-  const excludeClause = excludeId ? 'AND Id_categoria <> @ExcludeId' : '';
-  if (excludeId) req.input('ExcludeId', sql.Int, excludeId);
-  const result = await req.query(`
-    SELECT Id_categoria FROM CategoriaRepuestos
-    WHERE Nombre = @Nombre ${excludeClause}
-  `);
-  return result.recordset[0] || null;
+  return prisma.categoriaRepuestos.findFirst({
+    where: {
+      Nombre: nombre,
+      ...(excludeId ? { NOT: { Id_categoria: excludeId } } : {}),
+    },
+    select: { Id_categoria: true },
+  });
 };
 
 const create = async ({ Nombre, Descripcion }) => {
-  const pool = getPool();
-  const result = await pool.request()
-    .input('Nombre',      sql.VarChar(60),  Nombre)
-    .input('Descripcion', sql.VarChar(200), Descripcion || null)
-    .query(`
-      INSERT INTO CategoriaRepuestos (Nombre, Descripcion, Estado)
-      OUTPUT INSERTED.Id_categoria, INSERTED.Nombre, INSERTED.Descripcion, INSERTED.Estado
-      VALUES (@Nombre, @Descripcion, 1)
-    `);
-  return result.recordset[0];
+  return prisma.categoriaRepuestos.create({
+    data: { Nombre, Descripcion: Descripcion || null },
+  });
 };
 
 const update = async (id, { Nombre, Descripcion }) => {
-  const pool = getPool();
-  const result = await pool.request()
-    .input('id',          sql.Int,          id)
-    .input('Nombre',      sql.VarChar(60),  Nombre      || null)
-    .input('Descripcion', sql.VarChar(200), Descripcion || null)
-    .query(`
-      UPDATE CategoriaRepuestos
-      SET Nombre      = COALESCE(@Nombre,      Nombre),
-          Descripcion = COALESCE(@Descripcion, Descripcion)
-      OUTPUT INSERTED.Id_categoria, INSERTED.Nombre, INSERTED.Descripcion, INSERTED.Estado
-      WHERE Id_categoria = @id
-    `);
-  return result.recordset[0] || null;
+  const data = {};
+  if (Nombre      != null) data.Nombre      = Nombre;
+  if (Descripcion != null) data.Descripcion = Descripcion;
+  try {
+    return await prisma.categoriaRepuestos.update({
+      where: { Id_categoria: id },
+      data,
+    });
+  } catch (e) {
+    if (e.code === 'P2025') return null;
+    throw e;
+  }
 };
 
 const toggleEstado = async (id, estado) => {
-  const pool = getPool();
-  const result = await pool.request()
-    .input('id',     sql.Int, id)
-    .input('Estado', sql.Bit, estado)
-    .query(`
-      UPDATE CategoriaRepuestos
-      SET Estado = @Estado
-      OUTPUT INSERTED.Id_categoria, INSERTED.Nombre, INSERTED.Estado
-      WHERE Id_categoria = @id
-    `);
-  return result.recordset[0] || null;
+  try {
+    return await prisma.categoriaRepuestos.update({
+      where: { Id_categoria: id },
+      data: { Estado: Boolean(estado) },
+      select: { Id_categoria: true, Nombre: true, Estado: true },
+    });
+  } catch (e) {
+    if (e.code === 'P2025') return null;
+    throw e;
+  }
 };
 
 module.exports = { findAll, findById, findByNombre, create, update, toggleEstado };

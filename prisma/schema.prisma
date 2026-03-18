@@ -1,0 +1,268 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Tipo_Doc {
+  Id_TipoDoc Int      @id @default(autoincrement())
+  Nombre     String   @db.VarChar(50)
+
+  clientes   Cliente[]
+  empleados  Empleado[]
+
+  @@map("Tipo_Doc")
+}
+
+model Rol {
+  Id_Rol      Int      @id @default(autoincrement())
+  Nombre      String   @db.VarChar(50)
+  Descripcion String?  @db.VarChar(200)
+  Estado      Boolean  @default(true)
+
+  empleados   Empleado[]
+  permisos    Roles_x_Permisos[]
+
+  @@map("Rol")
+}
+
+model Permisos {
+  Id_Permiso  Int      @id @default(autoincrement())
+  Nombre      String   @db.VarChar(80)
+  Descripcion String?  @db.VarChar(200)
+
+  roles       Roles_x_Permisos[]
+
+  @@map("Permisos")
+}
+
+model Roles_x_Permisos {
+  Id_Rol     Int
+  Id_Permiso Int
+
+  rol        Rol      @relation(fields: [Id_Rol],     references: [Id_Rol])
+  permiso    Permisos @relation(fields: [Id_Permiso], references: [Id_Permiso])
+
+  @@id([Id_Rol, Id_Permiso])
+  @@map("Roles_x_Permisos")
+}
+
+model Empleado {
+  id_empleado Int      @id @default(autoincrement())
+  Documento   String   @db.VarChar(20)
+  Nombre      String   @db.VarChar(100)
+  Id_TipoDoc  Int
+  Id_Rol      Int
+  Correo      String   @unique @db.VarChar(120)
+  Password    String   @db.VarChar(255)
+  Foto        String?  @db.VarChar(255)
+  Estado      Boolean  @default(true)
+
+  tipoDoc     Tipo_Doc  @relation(fields: [Id_TipoDoc], references: [Id_TipoDoc])
+  rol         Rol       @relation(fields: [Id_Rol],     references: [Id_Rol])
+  agendas     Agenda[]
+  novedades   Novedades[]
+
+  @@map("Empleado")
+}
+
+model Cliente {
+  Id_Cliente Int      @id @default(autoincrement())
+  Documento  String   @db.VarChar(20)
+  Nombre     String   @db.VarChar(100)
+  Id_TipoDoc Int
+  Foto       String?  @db.VarChar(255)
+  Estado     Boolean  @default(true)
+  Correo     String?  @db.VarChar(120)
+  Contacto   String?  @db.VarChar(50)
+
+  tipoDoc    Tipo_Doc  @relation(fields: [Id_TipoDoc], references: [Id_TipoDoc])
+  vehiculos  Vehiculo[]
+  agendas    Agenda[]
+
+  @@map("Cliente")
+}
+
+model Marca {
+  Id_Marca Int      @id @default(autoincrement())
+  Nombre   String   @db.VarChar(60)
+
+  vehiculos Vehiculo[]
+
+  @@map("Marca")
+}
+
+model Vehiculo {
+  Id_Vehiculo Int     @id @default(autoincrement())
+  Placa       String  @unique @db.VarChar(10)
+  VIN         String? @unique @db.VarChar(30)
+  Id_Cliente  Int
+  Id_Marca    Int
+  Modelo      String  @db.VarChar(50)
+  Año         Int
+  Color       String? @db.VarChar(30)
+  NumeroEjes  Int?
+  Estado      Boolean @default(true)
+
+  cliente    Cliente  @relation(fields: [Id_Cliente], references: [Id_Cliente])
+  marca      Marca    @relation(fields: [Id_Marca],   references: [Id_Marca])
+  agendas    Agenda[]
+
+  @@map("Vehiculo")
+}
+
+model CategoriaRepuestos {
+  Id_categoria Int      @id @default(autoincrement())
+  Nombre       String   @db.VarChar(60)
+  Descripcion  String?  @db.VarChar(200)
+  Estado       Boolean  @default(true)
+
+  repuestos    Repuestos[]
+
+  @@map("CategoriaRepuestos")
+}
+
+model Repuestos {
+  Id_Repuesto    Int      @id @default(autoincrement())
+  NombreRepuesto String   @db.VarChar(120)
+  Stock          Int      @default(0)
+  Precio         Decimal  @db.Decimal(10, 2)
+  Estado         Boolean  @default(true)
+  Id_categoria   Int
+
+  categoria      CategoriaRepuestos @relation(fields: [Id_categoria], references: [Id_categoria])
+  comprasDetalle Compras_Detalle[]
+  ordenRepuestos Orden_de_Trabajo_x_Repuestos[]
+
+  @@map("Repuestos")
+}
+
+model proveedor {
+  id_proveedor  Int      @id @default(autoincrement())
+  Documento     String   @db.VarChar(20)
+  TipoProveedor String   @db.VarChar(20)
+  nombre        String   @db.VarChar(120)
+  correo        String?  @db.VarChar(120)
+  contacto      String?  @db.VarChar(20)
+  ciudad        String?  @db.VarChar(60)
+  direccion     String?  @db.VarChar(150)
+  detalles      String?  @db.VarChar(200)
+  Estado        Boolean  @default(true)
+
+  compras       Compras[]
+
+  @@map("proveedor")
+}
+
+model Compras {
+  Id_Compra    Int      @id @default(autoincrement())
+  Fecha_compra DateTime @db.Date
+  id_proveedor Int
+  Total        Decimal  @db.Decimal(10, 2)
+  Estado       Boolean  @default(true)
+
+  proveedor    proveedor         @relation(fields: [id_proveedor], references: [id_proveedor])
+  detalles     Compras_Detalle[]
+
+  @@map("Compras")
+}
+
+model Compras_Detalle {
+  Id_Compra    Int
+  Id_Repuesto  Int
+  cantidad     Int
+  valor_unidad Decimal @db.Decimal(10, 2)
+  subtotal     Decimal @db.Decimal(10, 2)
+
+  compra       Compras   @relation(fields: [Id_Compra],   references: [Id_Compra])
+  repuesto     Repuestos @relation(fields: [Id_Repuesto], references: [Id_Repuesto])
+
+  @@id([Id_Compra, Id_Repuesto])
+  @@map("Compras_Detalle")
+}
+
+model Servicios {
+  Id_Servicio Int      @id @default(autoincrement())
+  Nombre      String   @db.VarChar(80)
+  Descripcion String?  @db.VarChar(200)
+  Precio      Decimal  @db.Decimal(10, 2)
+  Estado      Boolean  @default(true)
+
+  ordenServicios Orden_de_Trabajo_x_Servicios[]
+
+  @@map("Servicios")
+}
+
+model Agenda {
+  Id_Agenda         Int      @id @default(autoincrement())
+  Id_Cliente        Int
+  Id_Vehiculo       Int
+  id_empleado       Int
+  FechaAgendamiento DateTime @db.Date
+  Hora              String   @db.VarChar(8)
+  Estado            Boolean  @default(true)
+
+  cliente    Cliente  @relation(fields: [Id_Cliente],  references: [Id_Cliente])
+  vehiculo   Vehiculo @relation(fields: [Id_Vehiculo], references: [Id_Vehiculo])
+  empleado   Empleado @relation(fields: [id_empleado], references: [id_empleado])
+  ordenes    Orden_de_Trabajo[]
+
+  @@map("Agenda")
+}
+
+model Orden_de_Trabajo {
+  Id_Orden     Int      @id @default(autoincrement())
+  Id_Agenda    Int
+  Diagnostico  String?  @db.VarChar(500)
+  Kilometraje  Int?
+  FechaIngreso DateTime? @db.Date
+  FechaEntrega DateTime? @db.Date
+  Estado       Boolean   @default(true)
+
+  agenda       Agenda    @relation(fields: [Id_Agenda], references: [Id_Agenda])
+  servicios    Orden_de_Trabajo_x_Servicios[]
+  repuestos    Orden_de_Trabajo_x_Repuestos[]
+
+  @@map("Orden_de_Trabajo")
+}
+
+model Orden_de_Trabajo_x_Servicios {
+  Id_Orden        Int
+  Id_Servicio     Int
+  precio_unitario Decimal @db.Decimal(10, 2)
+  subtotal        Decimal @db.Decimal(10, 2)
+
+  orden    Orden_de_Trabajo @relation(fields: [Id_Orden],    references: [Id_Orden])
+  servicio Servicios        @relation(fields: [Id_Servicio], references: [Id_Servicio])
+
+  @@id([Id_Orden, Id_Servicio])
+  @@map("Orden_de_Trabajo_x_Servicios")
+}
+
+model Orden_de_Trabajo_x_Repuestos {
+  Id_Orden        Int
+  Id_Repuesto     Int
+  cantidad        Int
+  precio_unitario Decimal @db.Decimal(10, 2)
+  subtotal        Decimal @db.Decimal(10, 2)
+
+  orden    Orden_de_Trabajo @relation(fields: [Id_Orden],    references: [Id_Orden])
+  repuesto Repuestos        @relation(fields: [Id_Repuesto], references: [Id_Repuesto])
+
+  @@id([Id_Orden, Id_Repuesto])
+  @@map("Orden_de_Trabajo_x_Repuestos")
+}
+
+model Novedades {
+  Id_Novedad       Int       @id @default(autoincrement())
+  id_empleado      Int
+  Descripcion      String?   @db.VarChar(500)
+  Fecha_Novedad    DateTime? @db.Date
+  FechaRealizacion DateTime? @db.Date
+
+  empleado         Empleado  @relation(fields: [id_empleado], references: [id_empleado])
+
+  @@map("Novedades")
+}

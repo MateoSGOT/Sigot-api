@@ -1,90 +1,71 @@
-const { getPool, sql } = require('../config/db');
+const { prisma } = require('../config/db');
+
+const _fmt = ({ tipoDoc, ...c }) => ({ ...c, TipoDoc: tipoDoc.Nombre });
 
 const findAll = async () => {
-  const pool = getPool();
-  const result = await pool.request().query(`
-    SELECT c.Id_Cliente, c.Documento, c.Nombre, c.Foto, c.Estado,
-           c.Correo, c.Contacto, c.Id_TipoDoc,
-           t.Nombre AS TipoDoc
-    FROM Cliente c
-    INNER JOIN Tipo_Doc t ON c.Id_TipoDoc = t.Id_TipoDoc
-    WHERE c.Estado = 1
-    ORDER BY c.Nombre
-  `);
-  return result.recordset;
+  const rows = await prisma.cliente.findMany({
+    where: { Estado: true },
+    include: { tipoDoc: { select: { Nombre: true } } },
+    orderBy: { Nombre: 'asc' },
+  });
+  return rows.map(_fmt);
 };
 
 const findById = async (id) => {
-  const pool = getPool();
-  const result = await pool.request()
-    .input('Id_Cliente', sql.Int, id)
-    .query(`
-      SELECT c.Id_Cliente, c.Documento, c.Nombre, c.Foto, c.Estado,
-             c.Correo, c.Contacto, c.Id_TipoDoc,
-             t.Nombre AS TipoDoc
-      FROM Cliente c
-      INNER JOIN Tipo_Doc t ON c.Id_TipoDoc = t.Id_TipoDoc
-      WHERE c.Id_Cliente = @Id_Cliente
-    `);
-  return result.recordset[0] || null;
+  const row = await prisma.cliente.findUnique({
+    where: { Id_Cliente: id },
+    include: { tipoDoc: { select: { Nombre: true } } },
+  });
+  return row ? _fmt(row) : null;
 };
 
 const create = async ({ Documento, Nombre, Id_TipoDoc, Foto, Correo, Contacto }) => {
-  const pool = getPool();
-  const result = await pool.request()
-    .input('Documento',  sql.VarChar(20),  Documento)
-    .input('Nombre',     sql.VarChar(100), Nombre)
-    .input('Id_TipoDoc', sql.Int,          Id_TipoDoc)
-    .input('Foto',       sql.VarChar(255), Foto    || null)
-    .input('Correo',     sql.VarChar(120), Correo  || null)
-    .input('Contacto',   sql.VarChar(50),  Contacto || null)
-    .query(`
-      INSERT INTO Cliente (Documento, Nombre, Id_TipoDoc, Foto, Estado, Correo, Contacto)
-      OUTPUT INSERTED.Id_Cliente, INSERTED.Documento, INSERTED.Nombre,
-             INSERTED.Id_TipoDoc, INSERTED.Foto, INSERTED.Estado,
-             INSERTED.Correo, INSERTED.Contacto
-      VALUES (@Documento, @Nombre, @Id_TipoDoc, @Foto, 1, @Correo, @Contacto)
-    `);
-  return result.recordset[0];
+  const row = await prisma.cliente.create({
+    data: {
+      Documento,
+      Nombre,
+      Id_TipoDoc,
+      Foto:     Foto     || null,
+      Correo:   Correo   || null,
+      Contacto: Contacto || null,
+    },
+    include: { tipoDoc: { select: { Nombre: true } } },
+  });
+  return _fmt(row);
 };
 
 const update = async (id, { Documento, Nombre, Id_TipoDoc, Foto, Correo, Contacto }) => {
-  const pool = getPool();
-  const result = await pool.request()
-    .input('Id_Cliente', sql.Int,          id)
-    .input('Documento',  sql.VarChar(20),  Documento)
-    .input('Nombre',     sql.VarChar(100), Nombre)
-    .input('Id_TipoDoc', sql.Int,          Id_TipoDoc)
-    .input('Foto',       sql.VarChar(255), Foto     || null)
-    .input('Correo',     sql.VarChar(120), Correo   || null)
-    .input('Contacto',   sql.VarChar(50),  Contacto || null)
-    .query(`
-      UPDATE Cliente
-      SET Documento  = COALESCE(@Documento,  Documento),
-          Nombre     = COALESCE(@Nombre,     Nombre),
-          Id_TipoDoc = COALESCE(@Id_TipoDoc, Id_TipoDoc),
-          Foto       = COALESCE(@Foto,       Foto),
-          Correo     = COALESCE(@Correo,     Correo),
-          Contacto   = COALESCE(@Contacto,   Contacto)
-      OUTPUT INSERTED.Id_Cliente, INSERTED.Documento, INSERTED.Nombre,
-             INSERTED.Id_TipoDoc, INSERTED.Foto, INSERTED.Estado,
-             INSERTED.Correo, INSERTED.Contacto
-      WHERE Id_Cliente = @Id_Cliente
-    `);
-  return result.recordset[0] || null;
+  const data = {};
+  if (Documento  != null) data.Documento  = Documento;
+  if (Nombre     != null) data.Nombre     = Nombre;
+  if (Id_TipoDoc != null) data.Id_TipoDoc = Id_TipoDoc;
+  if (Foto       != null) data.Foto       = Foto;
+  if (Correo     != null) data.Correo     = Correo;
+  if (Contacto   != null) data.Contacto   = Contacto;
+  try {
+    const row = await prisma.cliente.update({
+      where: { Id_Cliente: id },
+      data,
+      include: { tipoDoc: { select: { Nombre: true } } },
+    });
+    return _fmt(row);
+  } catch (e) {
+    if (e.code === 'P2025') return null;
+    throw e;
+  }
 };
 
 const toggleEstado = async (id, estado) => {
-  const pool = getPool();
-  const result = await pool.request()
-    .input('Id_Cliente', sql.Int, id)
-    .input('Estado',     sql.Bit, estado)
-    .query(`
-      UPDATE Cliente SET Estado = @Estado
-      OUTPUT INSERTED.Id_Cliente, INSERTED.Estado
-      WHERE Id_Cliente = @Id_Cliente
-    `);
-  return result.recordset[0] || null;
+  try {
+    return await prisma.cliente.update({
+      where: { Id_Cliente: id },
+      data: { Estado: Boolean(estado) },
+      select: { Id_Cliente: true, Estado: true },
+    });
+  } catch (e) {
+    if (e.code === 'P2025') return null;
+    throw e;
+  }
 };
 
 module.exports = { findAll, findById, create, update, toggleEstado };

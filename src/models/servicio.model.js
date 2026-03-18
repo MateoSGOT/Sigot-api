@@ -1,86 +1,53 @@
-const { getPool, sql } = require('../config/db');
+const { prisma } = require('../config/db');
 
 const findAll = async () => {
-  const pool = getPool();
-  const result = await pool.request()
-    .query(`
-      SELECT Id_Servicio, Nombre, Descripcion, Precio, Estado
-      FROM Servicios
-      WHERE Estado = 1
-    `);
-  return result.recordset;
+  return prisma.servicios.findMany({ where: { Estado: true } });
 };
 
 const findById = async (id) => {
-  const pool = getPool();
-  const result = await pool.request()
-    .input('id', sql.Int, id)
-    .query(`
-      SELECT Id_Servicio, Nombre, Descripcion, Precio, Estado
-      FROM Servicios
-      WHERE Id_Servicio = @id
-    `);
-  return result.recordset[0] || null;
+  return prisma.servicios.findUnique({ where: { Id_Servicio: id } });
 };
 
 const findByNombre = async (nombre, excludeId = null) => {
-  const pool = getPool();
-  const req = pool.request().input('Nombre', sql.VarChar(80), nombre);
-  const excludeClause = excludeId ? 'AND Id_Servicio <> @ExcludeId' : '';
-  if (excludeId) req.input('ExcludeId', sql.Int, excludeId);
-  const result = await req.query(`
-    SELECT Id_Servicio FROM Servicios
-    WHERE Nombre = @Nombre ${excludeClause}
-  `);
-  return result.recordset[0] || null;
+  return prisma.servicios.findFirst({
+    where: {
+      Nombre: nombre,
+      ...(excludeId ? { NOT: { Id_Servicio: excludeId } } : {}),
+    },
+    select: { Id_Servicio: true },
+  });
 };
 
 const create = async ({ Nombre, Descripcion, Precio }) => {
-  const pool = getPool();
-  const result = await pool.request()
-    .input('Nombre',      sql.VarChar(80),      Nombre)
-    .input('Descripcion', sql.VarChar(200),     Descripcion || null)
-    .input('Precio',      sql.Decimal(10, 2),   Precio)
-    .query(`
-      INSERT INTO Servicios (Nombre, Descripcion, Precio, Estado)
-      OUTPUT INSERTED.Id_Servicio, INSERTED.Nombre, INSERTED.Descripcion,
-             INSERTED.Precio, INSERTED.Estado
-      VALUES (@Nombre, @Descripcion, @Precio, 1)
-    `);
-  return result.recordset[0];
+  return prisma.servicios.create({
+    data: { Nombre, Descripcion: Descripcion || null, Precio },
+  });
 };
 
 const update = async (id, { Nombre, Descripcion, Precio }) => {
-  const pool = getPool();
-  const result = await pool.request()
-    .input('id',          sql.Int,            id)
-    .input('Nombre',      sql.VarChar(80),    Nombre        || null)
-    .input('Descripcion', sql.VarChar(200),   Descripcion   || null)
-    .input('Precio',      sql.Decimal(10, 2), Precio        ?? null)
-    .query(`
-      UPDATE Servicios
-      SET Nombre      = COALESCE(@Nombre,      Nombre),
-          Descripcion = COALESCE(@Descripcion, Descripcion),
-          Precio      = COALESCE(@Precio,      Precio)
-      OUTPUT INSERTED.Id_Servicio, INSERTED.Nombre, INSERTED.Descripcion,
-             INSERTED.Precio, INSERTED.Estado
-      WHERE Id_Servicio = @id
-    `);
-  return result.recordset[0] || null;
+  const data = {};
+  if (Nombre      != null) data.Nombre      = Nombre;
+  if (Descripcion != null) data.Descripcion = Descripcion;
+  if (Precio      != null) data.Precio      = Precio;
+  try {
+    return await prisma.servicios.update({ where: { Id_Servicio: id }, data });
+  } catch (e) {
+    if (e.code === 'P2025') return null;
+    throw e;
+  }
 };
 
 const toggleEstado = async (id, estado) => {
-  const pool = getPool();
-  const result = await pool.request()
-    .input('id',     sql.Int, id)
-    .input('Estado', sql.Bit, estado)
-    .query(`
-      UPDATE Servicios
-      SET Estado = @Estado
-      OUTPUT INSERTED.Id_Servicio, INSERTED.Nombre, INSERTED.Estado
-      WHERE Id_Servicio = @id
-    `);
-  return result.recordset[0] || null;
+  try {
+    return await prisma.servicios.update({
+      where: { Id_Servicio: id },
+      data: { Estado: Boolean(estado) },
+      select: { Id_Servicio: true, Nombre: true, Estado: true },
+    });
+  } catch (e) {
+    if (e.code === 'P2025') return null;
+    throw e;
+  }
 };
 
 module.exports = { findAll, findById, findByNombre, create, update, toggleEstado };

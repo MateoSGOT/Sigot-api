@@ -1,75 +1,52 @@
-const { getPool, sql } = require('../config/db');
+const { prisma } = require('../config/db');
 
 const getRepuestos = async () => {
-  const pool = getPool();
-  const result = await pool.request()
-    .query(`
-      SELECT r.Id_Repuesto, r.NombreRepuesto, r.Stock, r.Precio,
-             c.Nombre AS categoria
-      FROM Repuestos r
-      JOIN CategoriaRepuestos c ON c.Id_categoria = r.Id_categoria
-      WHERE r.Estado = 1
-      ORDER BY r.Stock ASC
-    `);
-  return result.recordset;
+  const rows = await prisma.repuestos.findMany({
+    where: { Estado: true },
+    include: { categoria: { select: { Nombre: true } } },
+    orderBy: { Stock: 'asc' },
+  });
+  return rows.map(({ categoria, ...r }) => ({ ...r, categoria: categoria.Nombre }));
 };
 
 const getCompras = async () => {
-  const pool = getPool();
+  const agg = await prisma.compras.aggregate({
+    where: { Estado: true },
+    _count: { Id_Compra: true },
+    _sum:   { Total: true },
+  });
 
-  const resumenResult = await pool.request()
-    .query(`
-      SELECT COUNT(*)        AS totalCompras,
-             SUM(Total)      AS totalInvertido
-      FROM Compras
-      WHERE Estado = 1
-    `);
-
-  const ultimasResult = await pool.request()
-    .query(`
-      SELECT TOP 5
-             c.Id_Compra, c.Fecha_compra, p.nombre AS proveedor,
-             c.Total
-      FROM Compras c
-      JOIN proveedor p ON p.id_proveedor = c.id_proveedor
-      WHERE c.Estado = 1
-      ORDER BY c.Id_Compra DESC
-    `);
+  const ultimas = await prisma.compras.findMany({
+    where: { Estado: true },
+    include: { proveedor: { select: { nombre: true } } },
+    orderBy: { Id_Compra: 'desc' },
+    take: 5,
+  });
 
   return {
-    totalCompras:   resumenResult.recordset[0].totalCompras,
-    totalInvertido: resumenResult.recordset[0].totalInvertido ?? 0,
-    ultimas:        ultimasResult.recordset,
+    totalCompras:   agg._count.Id_Compra,
+    totalInvertido: Number(agg._sum.Total) ?? 0,
+    ultimas: ultimas.map(({ proveedor, ...c }) => ({ ...c, proveedor: proveedor.nombre })),
   };
 };
 
 const getServicios = async () => {
-  const pool = getPool();
-  const result = await pool.request()
-    .query(`
-      SELECT s.Id_Servicio, s.Nombre, s.Precio,
-             COUNT(xs.Id_Orden) AS vecesUsado
-      FROM Servicios s
-      LEFT JOIN Orden_de_Trabajo_x_Servicios xs ON xs.Id_Servicio = s.Id_Servicio
-      WHERE s.Estado = 1
-      GROUP BY s.Id_Servicio, s.Nombre, s.Precio
-      ORDER BY vecesUsado DESC
-    `);
-  return result.recordset;
+  const rows = await prisma.servicios.findMany({
+    where: { Estado: true },
+    include: { _count: { select: { ordenServicios: true } } },
+  });
+  return rows
+    .map(({ _count, ...s }) => ({ ...s, vecesUsado: _count.ordenServicios }))
+    .sort((a, b) => b.vecesUsado - a.vecesUsado);
 };
 
 const getEmpleados = async () => {
-  const pool = getPool();
-  const result = await pool.request()
-    .query(`
-      SELECT e.id_empleado, e.Nombre, e.Correo, e.Foto,
-             r.Nombre AS rol
-      FROM Empleado e
-      JOIN Rol r ON r.Id_Rol = e.Id_Rol
-      WHERE e.Estado = 1
-      ORDER BY e.Nombre
-    `);
-  return result.recordset;
+  const rows = await prisma.empleado.findMany({
+    where: { Estado: true },
+    include: { rol: { select: { Nombre: true } } },
+    orderBy: { Nombre: 'asc' },
+  });
+  return rows.map(({ rol, Password, tipoDoc, ...e }) => ({ ...e, rol: rol.Nombre }));
 };
 
 module.exports = { getRepuestos, getCompras, getServicios, getEmpleados };

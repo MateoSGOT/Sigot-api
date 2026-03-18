@@ -21,6 +21,14 @@ const catalogoRoutes          = require('./routes/catalogo.routes');
 
 const app = express();
 
+// Prisma Decimal serializa como string por defecto; convertir a número en JSON
+app.set('json replacer', (key, value) => {
+  if (value !== null && typeof value === 'object' && value.constructor?.name === 'Decimal') {
+    return Number(value);
+  }
+  return value;
+});
+
 app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());

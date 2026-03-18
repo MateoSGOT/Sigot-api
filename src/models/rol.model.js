@@ -1,78 +1,52 @@
-const { getPool, sql } = require('../config/db');
+const { prisma } = require('../config/db');
 
 const findAll = async () => {
-  const pool = getPool();
-  const result = await pool.request().query(`
-    SELECT Id_Rol, Nombre, Descripcion, Estado
-    FROM Rol
-    ORDER BY Nombre
-  `);
-  return result.recordset;
+  return prisma.rol.findMany({ orderBy: { Nombre: 'asc' } });
 };
 
 const findById = async (id) => {
-  const pool = getPool();
-  const result = await pool.request()
-    .input('Id_Rol', sql.Int, id)
-    .query(`
-      SELECT Id_Rol, Nombre, Descripcion, Estado
-      FROM Rol
-      WHERE Id_Rol = @Id_Rol
-    `);
-  return result.recordset[0] || null;
+  return prisma.rol.findUnique({ where: { Id_Rol: id } });
 };
 
 const findByNombre = async (nombre, excludeId = null) => {
-  const pool = getPool();
-  const request = pool.request().input('Nombre', sql.VarChar(50), nombre);
-  const whereExclude = excludeId ? 'AND Id_Rol <> @ExcludeId' : '';
-  if (excludeId) request.input('ExcludeId', sql.Int, excludeId);
-  const result = await request.query(
-    `SELECT Id_Rol FROM Rol WHERE Nombre = @Nombre ${whereExclude}`
-  );
-  return result.recordset[0] || null;
+  return prisma.rol.findFirst({
+    where: {
+      Nombre: nombre,
+      ...(excludeId ? { NOT: { Id_Rol: excludeId } } : {}),
+    },
+    select: { Id_Rol: true },
+  });
 };
 
 const create = async ({ Nombre, Descripcion }) => {
-  const pool = getPool();
-  const result = await pool.request()
-    .input('Nombre',      sql.VarChar(50),  Nombre)
-    .input('Descripcion', sql.VarChar(200), Descripcion || null)
-    .query(`
-      INSERT INTO Rol (Nombre, Descripcion, Estado)
-      OUTPUT INSERTED.Id_Rol, INSERTED.Nombre, INSERTED.Descripcion, INSERTED.Estado
-      VALUES (@Nombre, @Descripcion, 1)
-    `);
-  return result.recordset[0];
+  return prisma.rol.create({
+    data: { Nombre, Descripcion: Descripcion || null },
+  });
 };
 
 const update = async (id, { Nombre, Descripcion }) => {
-  const pool = getPool();
-  const result = await pool.request()
-    .input('Id_Rol',      sql.Int,          id)
-    .input('Nombre',      sql.VarChar(50),  Nombre      || null)
-    .input('Descripcion', sql.VarChar(200), Descripcion || null)
-    .query(`
-      UPDATE Rol
-      SET Nombre      = COALESCE(@Nombre,      Nombre),
-          Descripcion = COALESCE(@Descripcion, Descripcion)
-      OUTPUT INSERTED.Id_Rol, INSERTED.Nombre, INSERTED.Descripcion, INSERTED.Estado
-      WHERE Id_Rol = @Id_Rol
-    `);
-  return result.recordset[0] || null;
+  const data = {};
+  if (Nombre      != null) data.Nombre      = Nombre;
+  if (Descripcion != null) data.Descripcion = Descripcion;
+  try {
+    return await prisma.rol.update({ where: { Id_Rol: id }, data });
+  } catch (e) {
+    if (e.code === 'P2025') return null;
+    throw e;
+  }
 };
 
 const toggleEstado = async (id, estado) => {
-  const pool = getPool();
-  const result = await pool.request()
-    .input('Id_Rol', sql.Int, id)
-    .input('Estado', sql.Bit, estado)
-    .query(`
-      UPDATE Rol SET Estado = @Estado
-      OUTPUT INSERTED.Id_Rol, INSERTED.Estado
-      WHERE Id_Rol = @Id_Rol
-    `);
-  return result.recordset[0] || null;
+  try {
+    return await prisma.rol.update({
+      where: { Id_Rol: id },
+      data: { Estado: Boolean(estado) },
+      select: { Id_Rol: true, Estado: true },
+    });
+  } catch (e) {
+    if (e.code === 'P2025') return null;
+    throw e;
+  }
 };
 
 module.exports = { findAll, findById, findByNombre, create, update, toggleEstado };
