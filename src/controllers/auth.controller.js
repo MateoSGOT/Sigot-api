@@ -47,4 +47,19 @@ const recuperarPassword = async (req, res, next) => {
   }
 };
 
-module.exports = { login, registro, logout, recuperarPassword };
+const resetPassword = async (req, res, next) => {
+  try {
+    const { Correo, Codigo, NuevaPassword } = req.body;
+    if (!Correo)       throw new BadRequestError('El correo es obligatorio');
+    if (!Codigo)       throw new BadRequestError('El código es obligatorio');
+    if (!NuevaPassword) throw new BadRequestError('La nueva contraseña es obligatoria');
+    if (NuevaPassword.length < 6) throw new BadRequestError('La contraseña debe tener al menos 6 caracteres');
+
+    const result = await authService.resetPassword(Correo, Codigo, NuevaPassword);
+    res.json({ status: 'ok', ...result });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { login, registro, logout, recuperarPassword, resetPassword };

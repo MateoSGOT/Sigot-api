@@ -8,6 +8,7 @@ router.post('/login',             authController.login);
 router.post('/registro',          authController.registro);
 router.post('/logout',            authenticate, authController.logout);
 router.post('/recuperar-password', authController.recuperarPassword);
+router.post('/reset-password',    authController.resetPassword);
 
 // Endpoint temporal de diagnóstico del mailer — eliminar en producción
 router.get('/test-mail', async (req, res) => {
