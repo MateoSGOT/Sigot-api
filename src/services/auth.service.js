@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const { signToken } = require('../utils/jwt');
 const empleadoModel = require('../models/empleado.model');
 const { UnauthorizedError, ConflictError, NotFoundError } = require('../errors/httpErrors');
+const { enviarRecuperacionPassword } = require('../utils/mailer');
 
 const login = async (correo, password) => {
   const empleado = await empleadoModel.findByCorreo(correo);
@@ -70,8 +71,6 @@ const logout = async () => {
   return { message: 'Sesión cerrada correctamente' };
 };
 
-// Genera un token de recuperación de corta duración.
-// En producción, este token se enviaría por correo electrónico.
 const recuperarPassword = async (correo) => {
   const empleado = await empleadoModel.findByCorreo(correo);
   if (!empleado) {
@@ -81,15 +80,11 @@ const recuperarPassword = async (correo) => {
 
   const tokenRecuperacion = signToken(
     { id_empleado: empleado.id_empleado, Correo: empleado.Correo, tipo: 'recuperacion' },
-    // TODO: integrar servicio de correo (nodemailer, SendGrid, etc.) para enviar este token
   );
 
-  // En producción: enviar tokenRecuperacion por email, no retornarlo en la respuesta
-  return {
-    message: 'Si el correo está registrado, recibirás instrucciones para recuperar tu contraseña',
-    // Solo en desarrollo se expone el token directamente
-    ...(process.env.NODE_ENV === 'development' && { tokenRecuperacion }),
-  };
+  await enviarRecuperacionPassword(empleado.Correo, empleado.Nombre, tokenRecuperacion);
+
+  return { message: 'Si el correo está registrado, recibirás instrucciones para recuperar tu contraseña' };
 };
 
 module.exports = { login, registro, logout, recuperarPassword };
