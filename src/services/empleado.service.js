@@ -1,5 +1,5 @@
 const empleadoModel = require('../models/empleado.model');
-const { getPool, sql } = require('../config/db');
+const { prisma } = require('../config/db');
 const { NotFoundError, ConflictError } = require('../errors/httpErrors');
 const bcrypt = require('bcryptjs');
 
@@ -20,17 +20,11 @@ const create = async (data) => {
   const docExiste = await empleadoModel.findByDocumento(data.Documento);
   if (docExiste) throw new ConflictError(`Ya existe un empleado con el documento "${data.Documento}"`);
 
-  const pool = getPool();
+  const rol = await prisma.rol.findFirst({ where: { Id_Rol: data.Id_Rol, Estado: true } });
+  if (!rol) throw new NotFoundError(`Rol con ID ${data.Id_Rol} no encontrado`);
 
-  const rolResult = await pool.request()
-    .input('Id_Rol', sql.Int, data.Id_Rol)
-    .query('SELECT Id_Rol FROM Rol WHERE Id_Rol = @Id_Rol AND Estado = 1');
-  if (!rolResult.recordset[0]) throw new NotFoundError(`Rol con ID ${data.Id_Rol} no encontrado`);
-
-  const tipoResult = await pool.request()
-    .input('Id_TipoDoc', sql.Int, data.Id_TipoDoc)
-    .query('SELECT Id_TipoDoc FROM Tipo_Doc WHERE Id_TipoDoc = @Id_TipoDoc');
-  if (!tipoResult.recordset[0]) throw new NotFoundError(`Tipo de documento con ID ${data.Id_TipoDoc} no encontrado`);
+  const tipoDoc = await prisma.tipo_Doc.findFirst({ where: { Id_TipoDoc: data.Id_TipoDoc } });
+  if (!tipoDoc) throw new NotFoundError(`Tipo de documento con ID ${data.Id_TipoDoc} no encontrado`);
 
   const hashedPassword = await bcrypt.hash(data.Password, 10);
   return empleadoModel.create({ ...data, Password: hashedPassword });
