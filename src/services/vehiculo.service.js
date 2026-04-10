@@ -1,6 +1,6 @@
 const vehiculoModel = require('../models/vehiculo.model');
 const clienteModel  = require('../models/cliente.model');
-const { getPool, sql } = require('../config/db');
+const { prisma } = require('../config/db');
 const { NotFoundError, ConflictError, BadRequestError } = require('../errors/httpErrors');
 
 const getAll = async () => {
@@ -25,11 +25,8 @@ const create = async (data) => {
   const cliente = await clienteModel.findById(data.Id_Cliente);
   if (!cliente) throw new NotFoundError(`Cliente con ID ${data.Id_Cliente} no encontrado`);
 
-  const pool = getPool();
-  const marcaResult = await pool.request()
-    .input('Id_Marca', sql.Int, data.Id_Marca)
-    .query('SELECT Id_Marca FROM Marca WHERE Id_Marca = @Id_Marca AND Estado = 1');
-  if (!marcaResult.recordset[0]) throw new NotFoundError(`Marca con ID ${data.Id_Marca} no encontrada`);
+  const marca = await prisma.marca.findFirst({ where: { Id_Marca: data.Id_Marca, Estado: true } });
+  if (!marca) throw new NotFoundError(`Marca con ID ${data.Id_Marca} no encontrada`);
 
   return vehiculoModel.create(data);
 };
