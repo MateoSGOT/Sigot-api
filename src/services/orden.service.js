@@ -1,6 +1,7 @@
 const ordenModel    = require('../models/orden.model');
 const servicioModel = require('../models/servicio.model');
 const repuestoModel = require('../models/repuesto.model');
+const categoriaModel = require('../models/categoriaRepuesto.model');
 const { NotFoundError, BadRequestError } = require('../errors/httpErrors');
 
 const FLUJO_VALIDOS = ['Pendiente', 'En proceso', 'Realizado', 'Inactivo'];
@@ -88,11 +89,15 @@ const addRepuestoLibre = async (id, { nombre, cantidad, precio_unitario }) => {
   await getById(id);
   let repuesto = await repuestoModel.findByNombre(nombre);
   if (!repuesto) {
+    let categoria = await categoriaModel.findById(1);
+    if (!categoria) {
+      categoria = await categoriaModel.create({ Nombre: 'General', Descripcion: 'Categoría general' });
+    }
     const created = await repuestoModel.create({
       NombreRepuesto: nombre,
       Stock: 999,
       Precio: precio_unitario,
-      Id_categoria: 1,
+      Id_categoria: categoria.Id_categoria,
     });
     repuesto = { Id_Repuesto: created.Id_Repuesto, Stock: 999 };
   }
