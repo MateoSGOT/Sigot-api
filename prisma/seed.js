@@ -88,12 +88,119 @@ const permisos = [
 ];
 
 async function main() {
+  // ── Permisos ──────────────────────────────────────────────────────────────
   console.log('Insertando permisos...');
-  const result = await prisma.permisos.createMany({
-    data: permisos,
-    skipDuplicates: true,
-  });
-  console.log(`${result.count} permisos insertados.`);
+  const pResult = await prisma.permisos.createMany({ data: permisos, skipDuplicates: true });
+  console.log(`${pResult.count} permisos insertados.`);
+
+  // ── Tipos de documento ────────────────────────────────────────────────────
+  const tiposDoc = ['Cédula de Ciudadanía','Cédula de Extranjería','NIT','Pasaporte','Tarjeta de Identidad'];
+  for (const nombre of tiposDoc) {
+    await prisma.tipo_Doc.upsert({
+      where:  { Id_TipoDoc: tiposDoc.indexOf(nombre) + 1 },
+      update: {},
+      create: { Nombre: nombre },
+    });
+  }
+  console.log('Tipos de documento listos.');
+
+  // ── Roles ─────────────────────────────────────────────────────────────────
+  const rolesData = [
+    { Nombre: 'Administrador', Descripcion: 'Acceso total al sistema' },
+    { Nombre: 'Mecánico',      Descripcion: 'Técnico de taller' },
+    { Nombre: 'Recepcionista', Descripcion: 'Atención al cliente y agenda' },
+  ];
+  for (const r of rolesData) {
+    await prisma.rol.upsert({
+      where:  { Id_Rol: rolesData.indexOf(r) + 1 },
+      update: {},
+      create: r,
+    });
+  }
+  console.log('Roles listos.');
+
+  // ── Asignar todos los permisos al rol Administrador ──────────────────────
+  const todosPermisos = await prisma.permisos.findMany({ select: { Id_Permiso: true } });
+  const rol = await prisma.rol.findFirst({ where: { Nombre: 'Administrador' } });
+  if (rol) {
+    for (const p of todosPermisos) {
+      await prisma.roles_x_Permisos.upsert({
+        where:  { Id_Rol_Id_Permiso: { Id_Rol: rol.Id_Rol, Id_Permiso: p.Id_Permiso } },
+        update: {},
+        create: { Id_Rol: rol.Id_Rol, Id_Permiso: p.Id_Permiso },
+      });
+    }
+    console.log(`Permisos asignados al rol Administrador.`);
+  }
+
+  // ── Marcas ────────────────────────────────────────────────────────────────
+  const marcas = ['Chevrolet','Renault','Mazda','Toyota','Nissan','Kia','Hyundai','Ford','Volkswagen','Honda','Suzuki','Mitsubishi'];
+  for (const nombre of marcas) {
+    const existe = await prisma.marca.findFirst({ where: { Nombre: nombre } });
+    if (!existe) await prisma.marca.create({ data: { Nombre: nombre } });
+  }
+  console.log('Marcas listas.');
+
+  // ── Categorías de repuestos ───────────────────────────────────────────────
+  const categorias = [
+    { Nombre: 'Filtros',     Descripcion: 'Filtros de aceite, aire y combustible' },
+    { Nombre: 'Frenos',      Descripcion: 'Pastillas, discos y tambores' },
+    { Nombre: 'Suspensión',  Descripcion: 'Amortiguadores, resortes y bujes' },
+    { Nombre: 'Motor',       Descripcion: 'Partes internas del motor' },
+    { Nombre: 'Eléctrico',   Descripcion: 'Baterías, alternadores y fusibles' },
+    { Nombre: 'Transmisión', Descripcion: 'Embrague, caja de cambios y diferenciales' },
+    { Nombre: 'Lubricantes', Descripcion: 'Aceites y grasas' },
+  ];
+  for (const c of categorias) {
+    const existe = await prisma.categoriaRepuestos.findFirst({ where: { Nombre: c.Nombre } });
+    if (!existe) await prisma.categoriaRepuestos.create({ data: c });
+  }
+  console.log('Categorías de repuestos listas.');
+
+  // ── Servicios ─────────────────────────────────────────────────────────────
+  const servicios = [
+    { Nombre: 'Cambio de aceite',               Precio: 80000 },
+    { Nombre: 'Revisión de frenos',             Precio: 60000 },
+    { Nombre: 'Cambio de pastillas',            Precio: 120000 },
+    { Nombre: 'Alineación y balanceo',          Precio: 90000 },
+    { Nombre: 'Diagnóstico general',            Precio: 50000 },
+    { Nombre: 'Cambio de correa distribución',  Precio: 350000 },
+    { Nombre: 'Mantenimiento preventivo',       Precio: 180000 },
+    { Nombre: 'Revisión general',               Precio: 70000 },
+    { Nombre: 'Alineación',                     Precio: 45000 },
+    { Nombre: 'Balanceo',                       Precio: 45000 },
+    { Nombre: 'Cambio de frenos',               Precio: 120000 },
+    { Nombre: 'Diagnóstico eléctrico',          Precio: 60000 },
+  ];
+  for (const s of servicios) {
+    const existe = await prisma.servicios.findFirst({ where: { Nombre: s.Nombre } });
+    if (!existe) await prisma.servicios.create({ data: { ...s, Descripcion: null } });
+  }
+  console.log('Servicios listos.');
+
+  // ── Empleado administrador ────────────────────────────────────────────────
+  const bcrypt = require('bcryptjs');
+  const tipoCC = await prisma.tipo_Doc.findFirst({ where: { Nombre: 'Cédula de Ciudadanía' } });
+  const rolAdmin = await prisma.rol.findFirst({ where: { Nombre: 'Administrador' } });
+
+  const adminExiste = await prisma.empleado.findFirst({ where: { Correo: 'admin@sigot.com' } });
+  if (!adminExiste && tipoCC && rolAdmin) {
+    const hash = await bcrypt.hash('Admin2024!', 10);
+    await prisma.empleado.create({
+      data: {
+        Documento:  '0000000001',
+        Nombre:     'Administrador SIGOT',
+        Id_TipoDoc: tipoCC.Id_TipoDoc,
+        Id_Rol:     rolAdmin.Id_Rol,
+        Correo:     'admin@sigot.com',
+        Password:   hash,
+        Estado:     true,
+      },
+    });
+    console.log('Empleado admin@sigot.com creado.');
+  } else {
+    console.log('Empleado admin ya existe.');
+  }
 }
 
 main()
