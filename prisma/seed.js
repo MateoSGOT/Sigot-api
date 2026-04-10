@@ -183,9 +183,9 @@ async function main() {
   const tipoCC = await prisma.tipo_Doc.findFirst({ where: { Nombre: 'Cédula de Ciudadanía' } });
   const rolAdmin = await prisma.rol.findFirst({ where: { Nombre: 'Administrador' } });
 
+  const hash = await bcrypt.hash('Admin2024!', 10);
   const adminExiste = await prisma.empleado.findFirst({ where: { Correo: 'admin@sigot.com' } });
   if (!adminExiste && tipoCC && rolAdmin) {
-    const hash = await bcrypt.hash('Admin2024!', 10);
     await prisma.empleado.create({
       data: {
         Documento:  '0000000001',
@@ -199,7 +199,11 @@ async function main() {
     });
     console.log('Empleado admin@sigot.com creado.');
   } else {
-    console.log('Empleado admin ya existe.');
+    await prisma.empleado.update({
+      where: { Correo: 'admin@sigot.com' },
+      data:  { Password: hash },
+    });
+    console.log('Contraseña admin actualizada.');
   }
 }
 
