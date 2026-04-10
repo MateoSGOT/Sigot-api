@@ -68,4 +68,15 @@ const generarOrden = async (req, res, next) => {
   }
 };
 
-module.exports = { getAll, getById, create, update, patchEstado, generarOrden };
+const upsertSimple = async (req, res, next) => {
+  try {
+    const agendaId = req.params.id ? Number(req.params.id) : null;
+    const agenda = await agendaService.upsertSimple(req.body, agendaId);
+    const status = agendaId ? 200 : 201;
+    res.status(status).json({ status: 'ok', data: agenda });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { getAll, getById, create, update, patchEstado, generarOrden, upsertSimple };

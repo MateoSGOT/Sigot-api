@@ -220,6 +220,8 @@ model Orden_de_Trabajo {
   FechaIngreso DateTime? @db.Date
   FechaEntrega DateTime? @db.Date
   Estado       Boolean   @default(true)
+  EstadoFlujo  String    @default("Pendiente") @db.VarChar(20)
+  ManoDeObra   Decimal?  @db.Decimal(10, 2)
 
   agenda       Agenda    @relation(fields: [Id_Agenda], references: [Id_Agenda])
   servicios    Orden_de_Trabajo_x_Servicios[]

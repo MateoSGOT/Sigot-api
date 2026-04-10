@@ -4,13 +4,15 @@ const _include = {
   cliente:  { select: { Nombre: true } },
   vehiculo: { select: { Placa:  true } },
   empleado: { select: { Nombre: true } },
+  ordenes:  { select: { Id_Orden: true }, orderBy: { Id_Orden: 'desc' }, take: 1 },
 };
 
-const _fmt = ({ cliente, vehiculo, empleado, ...a }) => ({
+const _fmt = ({ cliente, vehiculo, empleado, ordenes, ...a }) => ({
   ...a,
   cliente:  cliente.Nombre,
   vehiculo: vehiculo.Placa,
   empleado: empleado.Nombre,
+  ordenId:  ordenes[0]?.Id_Orden ?? null,
 });
 
 const findAll = async () => {

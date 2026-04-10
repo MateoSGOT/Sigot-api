@@ -86,10 +86,47 @@ const toggleEstado = async (id, estado) => {
   }
 };
 
+const cambiarFlujo = async (id, estadoFlujo) => {
+  try {
+    return await prisma.orden_de_Trabajo.update({
+      where: { Id_Orden: id },
+      data:  { EstadoFlujo: estadoFlujo },
+      select: { Id_Orden: true, EstadoFlujo: true },
+    });
+  } catch (e) {
+    if (e.code === 'P2025') return null;
+    throw e;
+  }
+};
+
+const actualizarManoDeObra = async (id, manoDeObra) => {
+  try {
+    return await prisma.orden_de_Trabajo.update({
+      where: { Id_Orden: id },
+      data:  { ManoDeObra: manoDeObra },
+      select: { Id_Orden: true, ManoDeObra: true },
+    });
+  } catch (e) {
+    if (e.code === 'P2025') return null;
+    throw e;
+  }
+};
+
 const addServicio = async (id_orden, { Id_Servicio, precio_unitario, subtotal }) => {
   return prisma.orden_de_Trabajo_x_Servicios.create({
     data: { Id_Orden: id_orden, Id_Servicio, precio_unitario, subtotal },
   });
+};
+
+const deleteServicio = async (id_orden, id_servicio) => {
+  try {
+    return await prisma.orden_de_Trabajo_x_Servicios.delete({
+      where: { Id_Orden_Id_Servicio: { Id_Orden: id_orden, Id_Servicio: id_servicio } },
+    });
+  } catch (e) {
+    if (e.code === 'P2025') return null;
+    throw e;
+  }
 };
 
 const addRepuesto = async (id_orden, { Id_Repuesto, cantidad, precio_unitario, subtotal }) => {
@@ -105,4 +142,27 @@ const addRepuesto = async (id_orden, { Id_Repuesto, cantidad, precio_unitario, s
   });
 };
 
-module.exports = { findAll, findById, update, toggleEstado, addServicio, addRepuesto };
+const deleteRepuesto = async (id_orden, id_repuesto) => {
+  try {
+    return await prisma.$transaction(async (tx) => {
+      const row = await tx.orden_de_Trabajo_x_Repuestos.delete({
+        where: { Id_Orden_Id_Repuesto: { Id_Orden: id_orden, Id_Repuesto: id_repuesto } },
+      });
+      await tx.repuestos.update({
+        where: { Id_Repuesto: id_repuesto },
+        data:  { Stock: { increment: row.cantidad } },
+      });
+      return row;
+    });
+  } catch (e) {
+    if (e.code === 'P2025') return null;
+    throw e;
+  }
+};
+
+module.exports = {
+  findAll, findById, update, toggleEstado,
+  cambiarFlujo, actualizarManoDeObra,
+  addServicio, deleteServicio,
+  addRepuesto, deleteRepuesto,
+};

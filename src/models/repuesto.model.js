@@ -12,6 +12,13 @@ const findAll = async () => {
   return rows.map(_fmt);
 };
 
+const findByNombre = async (nombre) => {
+  return prisma.repuestos.findFirst({
+    where: { NombreRepuesto: nombre, Estado: true },
+    select: { Id_Repuesto: true, Stock: true },
+  });
+};
+
 const findById = async (id) => {
   const row = await prisma.repuestos.findUnique({
     where: { Id_Repuesto: id },
@@ -74,4 +81,4 @@ const toggleEstado = async (id, estado) => {
   }
 };
 
-module.exports = { findAll, findById, findStock, create, update, toggleEstado };
+module.exports = { findAll, findById, findByNombre, findStock, create, update, toggleEstado };

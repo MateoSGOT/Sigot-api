@@ -11,5 +11,7 @@ router.post('/',            authenticate, checkPermiso('AGENDA.REGISTRAR'),     
 router.put('/:id',          authenticate, checkPermiso('AGENDA.EDITAR'),        agendaController.update);
 router.patch('/:id/estado', authenticate, checkPermiso('AGENDA.CAMBIAR_ESTADO'), agendaController.patchEstado);
 router.post('/:id/orden',   authenticate, checkPermiso('AGENDA.EDITAR'),        agendaController.generarOrden);
+router.post('/simple',      authenticate, checkPermiso('AGENDA.REGISTRAR'),     agendaController.upsertSimple);
+router.put('/:id/simple',   authenticate, checkPermiso('AGENDA.EDITAR'),        agendaController.upsertSimple);
 
 module.exports = router;
