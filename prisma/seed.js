@@ -180,31 +180,28 @@ async function main() {
 
   // ── Empleado administrador ────────────────────────────────────────────────
   const bcrypt = require('bcryptjs');
-  const tipoCC = await prisma.tipo_Doc.findFirst({ where: { Nombre: 'Cédula de Ciudadanía' } });
+  const tipoCC   = await prisma.tipo_Doc.findFirst({ where: { Nombre: 'Cédula de Ciudadanía' } });
   const rolAdmin = await prisma.rol.findFirst({ where: { Nombre: 'Administrador' } });
 
+  if (!tipoCC)   throw new Error('Seed: no se encontró el tipo de doc "Cédula de Ciudadanía"');
+  if (!rolAdmin) throw new Error('Seed: no se encontró el rol "Administrador"');
+
   const hash = await bcrypt.hash('Admin2024!', 10);
-  const adminExiste = await prisma.empleado.findFirst({ where: { Correo: 'admin@sigot.com' } });
-  if (!adminExiste && tipoCC && rolAdmin) {
-    await prisma.empleado.create({
-      data: {
-        Documento:  '0000000001',
-        Nombre:     'Administrador SIGOT',
-        Id_TipoDoc: tipoCC.Id_TipoDoc,
-        Id_Rol:     rolAdmin.Id_Rol,
-        Correo:     'admin@sigot.com',
-        Password:   hash,
-        Estado:     true,
-      },
-    });
-    console.log('Empleado admin@sigot.com creado.');
-  } else {
-    await prisma.empleado.update({
-      where: { Correo: 'admin@sigot.com' },
-      data:  { Password: hash },
-    });
-    console.log('Contraseña admin actualizada.');
-  }
+
+  await prisma.empleado.upsert({
+    where:  { Correo: 'admin@sigot.com' },
+    update: { Password: hash },
+    create: {
+      Documento:  '0000000001',
+      Nombre:     'Administrador SIGOT',
+      Id_TipoDoc: tipoCC.Id_TipoDoc,
+      Id_Rol:     rolAdmin.Id_Rol,
+      Correo:     'admin@sigot.com',
+      Password:   hash,
+      Estado:     true,
+    },
+  });
+  console.log('Empleado admin@sigot.com listo (upsert).');
 }
 
 main()
