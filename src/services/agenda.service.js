@@ -62,12 +62,15 @@ const upsertSimple = async (data, agendaId = null) => {
   // Buscar o crear vehículo por placa
   let vehiculo = await prisma.vehiculo.findFirst({ where: { Placa: vehiculoPlaca } });
   if (!vehiculo) {
-    const marca = await prisma.marca.findFirst();
+    let marca = await prisma.marca.findFirst();
+    if (!marca) {
+      marca = await prisma.marca.create({ data: { Nombre: 'Genérica' } });
+    }
     vehiculo = await prisma.vehiculo.create({
       data: {
         Placa:      vehiculoPlaca,
         Id_Cliente: cliente.Id_Cliente,
-        Id_Marca:   marca?.Id_Marca ?? 1,
+        Id_Marca:   marca.Id_Marca,
         Modelo:     vehiculoNombre || vehiculoPlaca,
         Año:        new Date().getFullYear(),
       },
