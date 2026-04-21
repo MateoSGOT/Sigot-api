@@ -25,7 +25,7 @@ const create = async (data) => {
   const cliente = await clienteModel.findById(data.Id_Cliente);
   if (!cliente) throw new NotFoundError(`Cliente con ID ${data.Id_Cliente} no encontrado`);
 
-  const marca = await prisma.marca.findFirst({ where: { Id_Marca: data.Id_Marca, Estado: true } });
+  const marca = await prisma.marca.findFirst({ where: { Id_Marca: data.Id_Marca } });
   if (!marca) throw new NotFoundError(`Marca con ID ${data.Id_Marca} no encontrada`);
 
   return vehiculoModel.create(data);
