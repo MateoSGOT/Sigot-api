@@ -18,6 +18,7 @@ const ordenRoutes             = require('./routes/orden.routes');
 const novedadRoutes           = require('./routes/novedad.routes');
 const dashboardRoutes         = require('./routes/dashboard.routes');
 const catalogoRoutes          = require('./routes/catalogo.routes');
+const permisosRoutes        = require('./routes/permisos.routes');
 
 const app = express();
 
@@ -50,6 +51,7 @@ app.use('/api/ordenes',             ordenRoutes);
 app.use('/api/novedades',           novedadRoutes);
 app.use('/api/dashboard',           dashboardRoutes);
 app.use('/api/catalogos',           catalogoRoutes);
+app.use('/api/permisos',           permisosRoutes);
 
 // Ruta no encontrada
 app.use((req, res, next) => {
