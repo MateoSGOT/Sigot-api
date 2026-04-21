@@ -14,4 +14,4 @@ services:
       - key: JWT_EXPIRES_IN
         value: 8h
       - key: DATABASE_URL
-        sync: false
+        value: postgresql://sigot_db_j19h_user:qUeVcsf2j4ioexJ9L2jAZ39WJmelsWM9@dpg-d7joncvavr4c73cgqo50-a/sigot_db_j19h
