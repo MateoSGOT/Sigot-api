@@ -22,10 +22,12 @@ const permisosRoutes        = require('./routes/permisos.routes');
 
 const app = express();
 
-// Prisma Decimal serializa como string por defecto; convertir a número en JSON
 app.set('json replacer', (key, value) => {
   if (value !== null && typeof value === 'object' && value.constructor?.name === 'Decimal') {
     return Number(value);
+  }
+  if (key === 'Estado' && typeof value === 'boolean') {
+    return value ? 1 : 0;
   }
   return value;
 });
@@ -53,12 +55,10 @@ app.use('/api/dashboard',           dashboardRoutes);
 app.use('/api/catalogos',           catalogoRoutes);
 app.use('/api/permisos',           permisosRoutes);
 
-// Ruta no encontrada
 app.use((req, res, next) => {
   next(new NotFoundError(`Ruta no encontrada: ${req.method} ${req.originalUrl}`));
 });
 
-// Manejador central de errores
 app.use(errorHandler);
 
 module.exports = app;
