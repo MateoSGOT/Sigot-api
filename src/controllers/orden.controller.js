@@ -45,8 +45,8 @@ const patchFlujo = async (req, res, next) => {
 
 const patchManoDeObra = async (req, res, next) => {
   try {
-    const { ManoDeObra } = req.body;
-    if (ManoDeObra === undefined) throw new BadRequestError('El campo ManoDeObra es obligatorio');
+    const ManoDeObra = req.body.ManoDeObra ?? req.body.mano_de_obra;
+    if (ManoDeObra == null) throw new BadRequestError('El campo ManoDeObra es obligatorio');
     const orden = await ordenService.actualizarManoDeObra(Number(req.params.id), ManoDeObra);
     res.json({ status: 'ok', data: orden });
   } catch (err) { next(err); }
