@@ -4,7 +4,8 @@ const { authenticate } = require('../middlewares/auth');
 
 const router = Router();
 
-router.get('/rol/:id_rol',  authenticate, permisosController.getByRol);
+router.get('/rol/:id_rol/nombres', authenticate, permisosController.getNombresByRol);
+router.get('/rol/:id_rol',         authenticate, permisosController.getByRol);
 router.put('/rol/:id_rol',  authenticate, permisosController.saveByRol);
 router.get('/',             authenticate, permisosController.getAll);
 router.post('/',            authenticate, permisosController.create);

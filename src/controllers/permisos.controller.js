@@ -51,6 +51,17 @@ const toggleEstado = async (req, res, next) => {
   res.json({ status: 'ok', data: { message: 'Estado no aplica para permisos del sistema' } });
 };
 
+const getNombresByRol = async (req, res, next) => {
+  try {
+    const id_rol = Number(req.params.id_rol);
+    const rows = await prisma.roles_x_Permisos.findMany({
+      where: { Id_Rol: id_rol },
+      include: { permiso: { select: { Nombre: true } } },
+    });
+    res.json({ status: 'ok', data: rows.map(r => r.permiso.Nombre) });
+  } catch (err) { next(err); }
+};
+
 const getByRol = async (req, res, next) => {
   try {
     const id_rol = Number(req.params.id_rol);
@@ -111,4 +122,4 @@ const saveByRol = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
-module.exports = { getAll, create, update, toggleEstado, getByRol, saveByRol };
+module.exports = { getAll, create, update, toggleEstado, getNombresByRol, getByRol, saveByRol };
