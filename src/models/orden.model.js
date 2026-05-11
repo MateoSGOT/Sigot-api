@@ -20,9 +20,9 @@ const _fmtOrden = ({ agenda, ...o }) => {
     Estado:      estadoNum,
     EstadoFlujo: o.EstadoFlujo,
     mano_de_obra: o.ManoDeObra != null ? Number(o.ManoDeObra) : null,
-    cliente:  agenda.cliente.Nombre,
-    vehiculo: agenda.vehiculo.Placa,
-    empleado: agenda.empleado.Nombre,
+    Cliente:  agenda.cliente.Nombre,
+    Vehiculo: agenda.vehiculo.Placa,
+    Empleado: agenda.empleado.Nombre,
   };
 };
 
@@ -48,9 +48,9 @@ const findById = async (id) => {
     Estado:      estadoNum,
     EstadoFlujo: orden.EstadoFlujo,
     mano_de_obra: orden.ManoDeObra != null ? Number(orden.ManoDeObra) : null,
-    cliente:  agenda.cliente.Nombre,
-    vehiculo: agenda.vehiculo.Placa,
-    empleado: agenda.empleado.Nombre,
+    Cliente:  agenda.cliente.Nombre,
+    Vehiculo: agenda.vehiculo.Placa,
+    Empleado: agenda.empleado.Nombre,
     servicios: servicios.map(({ servicio, ...xs }) => ({ ...xs, servicio: servicio.Nombre, precio_unitario: Number(xs.precio_unitario), subtotal: Number(xs.subtotal) })),
     repuestos:  repuestos.map(({ repuesto, ...xr }) => ({ ...xr, repuesto: repuesto.NombreRepuesto, precio_unitario: Number(xr.precio_unitario), subtotal: Number(xr.subtotal) })),
   };

@@ -44,16 +44,19 @@ const create = async ({ Id_Proveedor, Id_Repuesto, Cantidad, PrecioUnitario, Fec
   const precio = Number(PrecioUnitario);
   const subtotal = cant * precio;
 
-  return prisma.$transaction(async (tx) => {
-    const compra = await tx.compras.create({
+  const compra = await prisma.$transaction(async (tx) => {
+    const c = await tx.compras.create({
       data: { Fecha_compra: new Date(Fecha), id_proveedor: Number(Id_Proveedor), Total: subtotal },
     });
     await tx.compras_Detalle.create({
-      data: { Id_Compra: compra.Id_Compra, Id_Repuesto: Number(Id_Repuesto), cantidad: cant, valor_unidad: precio, subtotal },
+      data: { Id_Compra: c.Id_Compra, Id_Repuesto: Number(Id_Repuesto), cantidad: cant, valor_unidad: precio, subtotal },
     });
     await tx.repuestos.update({ where: { Id_Repuesto: Number(Id_Repuesto) }, data: { Stock: { increment: cant } } });
-    return compra;
+    return c;
   });
+
+  const row = await prisma.compras.findUnique({ where: { Id_Compra: compra.Id_Compra }, include: _include });
+  return _fmt(row);
 };
 
 const toggleEstado = async (id, estado) => {
