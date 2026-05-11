@@ -13,26 +13,14 @@ const getById = async (id) => {
   return compra;
 };
 
-const create = async ({ Fecha_compra, id_proveedor, detalles }) => {
-  const proveedor = await proveedorModel.findById(id_proveedor);
-  if (!proveedor) throw new NotFoundError(`Proveedor con ID ${id_proveedor} no encontrado`);
+const create = async ({ Id_Proveedor, Id_Repuesto, Cantidad, PrecioUnitario, Fecha }) => {
+  const proveedor = await proveedorModel.findById(Number(Id_Proveedor));
+  if (!proveedor) throw new NotFoundError(`Proveedor con ID ${Id_Proveedor} no encontrado`);
 
-  for (const det of detalles) {
-    const repuesto = await repuestoModel.findById(det.Id_Repuesto);
-    if (!repuesto) throw new NotFoundError(`Repuesto con ID ${det.Id_Repuesto} no encontrado`);
-  }
+  const repuesto = await repuestoModel.findById(Number(Id_Repuesto));
+  if (!repuesto) throw new NotFoundError(`Repuesto con ID ${Id_Repuesto} no encontrado`);
 
-  // Calcular subtotal por línea y total general
-  const detallesConSubtotal = detalles.map((det) => ({
-    ...det,
-    subtotal: parseFloat((det.cantidad * det.valor_unidad).toFixed(2)),
-  }));
-
-  const Total = parseFloat(
-    detallesConSubtotal.reduce((acc, det) => acc + det.subtotal, 0).toFixed(2)
-  );
-
-  return compraModel.create({ Fecha_compra, id_proveedor, Total, detalles: detallesConSubtotal });
+  return compraModel.create({ Id_Proveedor, Id_Repuesto, Cantidad, PrecioUnitario, Fecha });
 };
 
 const toggleEstado = async (id, estado) => {

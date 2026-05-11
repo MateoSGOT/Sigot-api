@@ -202,6 +202,20 @@ async function main() {
     },
   });
   console.log('Empleado admin@sigot.com listo (upsert).');
+
+  // ── Cliente demo para portal ──────────────────────────────────────────────
+  await prisma.cliente.upsert({
+    where:  { Id_Cliente: 1 },
+    update: {},
+    create: {
+      Documento:  '1234567890',
+      Nombre:     'Cliente Demo',
+      Id_TipoDoc: tipoCC.Id_TipoDoc,
+      Correo:     'cliente@sigot.com',
+      Estado:     true,
+    },
+  });
+  console.log('Cliente demo cliente@sigot.com listo (upsert).');
 }
 
 main()

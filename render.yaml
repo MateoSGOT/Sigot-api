@@ -13,5 +13,11 @@ services:
         sync: false
       - key: JWT_EXPIRES_IN
         value: 8h
+      - key: FRONTEND_URL
+        sync: false
+      - key: MAIL_USER
+        sync: false
+      - key: MAIL_PASS
+        sync: false
       - key: DATABASE_URL
-        value: postgresql://sigot_db_j19h_user:qUeVcsf2j4ioexJ9L2jAZ39WJmelsWM9@dpg-d7joncvavr4c73cgqo50-a/sigot_db_j19h
+        sync: false

@@ -103,4 +103,36 @@ const resetPassword = async (correo, codigo, nuevaPassword) => {
   return { message: 'Contraseña actualizada correctamente' };
 };
 
-module.exports = { login, registro, logout, recuperarPassword, resetPassword };
+const me = async (id_empleado) => {
+  const empleado = await empleadoModel.findById(id_empleado);
+  if (!empleado) throw new NotFoundError('Empleado no encontrado');
+  return empleado;
+};
+
+const clienteLogin = async (correo) => {
+  const { prisma } = require('../config/db');
+  const cliente = await prisma.cliente.findFirst({
+    where: { Correo: correo, Estado: true },
+    include: { tipoDoc: { select: { Nombre: true } } },
+  });
+  if (!cliente) throw new UnauthorizedError('Credenciales incorrectas');
+
+  const { tipoDoc, ...clienteData } = cliente;
+  const token = signToken({
+    id_cliente: clienteData.Id_Cliente,
+    Nombre:     clienteData.Nombre,
+    Correo:     clienteData.Correo,
+    tipo:       'cliente',
+  });
+
+  return {
+    token,
+    cliente: {
+      ...clienteData,
+      TipoDocumento: tipoDoc?.Nombre || null,
+      Telefono:      clienteData.Contacto || null,
+    },
+  };
+};
+
+module.exports = { login, registro, logout, me, clienteLogin, recuperarPassword, resetPassword };

@@ -62,4 +62,24 @@ const resetPassword = async (req, res, next) => {
   }
 };
 
-module.exports = { login, registro, logout, recuperarPassword, resetPassword };
+const me = async (req, res, next) => {
+  try {
+    const result = await authService.me(req.user.id_empleado);
+    res.json({ status: 'ok', data: result });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const clienteLogin = async (req, res, next) => {
+  try {
+    const { Correo, Password } = req.body;
+    if (!Correo) throw new BadRequestError('El correo es obligatorio');
+    const result = await authService.clienteLogin(Correo, Password);
+    res.json({ status: 'ok', data: result });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { login, registro, logout, me, clienteLogin, recuperarPassword, resetPassword };

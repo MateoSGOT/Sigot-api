@@ -32,7 +32,10 @@ app.set('json replacer', (key, value) => {
   return value;
 });
 
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || '*',
+  credentials: true,
+}));
 app.use(morgan('dev'));
 app.use(express.json());
 

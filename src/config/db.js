@@ -2,7 +2,10 @@ require('dotenv').config();
 const { PrismaClient } = require('@prisma/client');
 const { PrismaPg } = require('@prisma/adapter-pg');
 
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
+const sslConfig = process.env.NODE_ENV === 'production'
+  ? { ssl: { rejectUnauthorized: false } }
+  : {};
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL, ...sslConfig });
 const prisma = new PrismaClient({ adapter });
 
 const connectDB = async () => {
