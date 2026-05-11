@@ -19,6 +19,7 @@ const novedadRoutes           = require('./routes/novedad.routes');
 const dashboardRoutes         = require('./routes/dashboard.routes');
 const catalogoRoutes          = require('./routes/catalogo.routes');
 const permisosRoutes        = require('./routes/permisos.routes');
+const portalRoutes          = require('./routes/portal.routes');
 
 const app = express();
 
@@ -57,6 +58,7 @@ app.use('/api/novedades',           novedadRoutes);
 app.use('/api/dashboard',           dashboardRoutes);
 app.use('/api/catalogos',           catalogoRoutes);
 app.use('/api/permisos',           permisosRoutes);
+app.use('/api/portal',             portalRoutes);
 
 app.use((req, res, next) => {
   next(new NotFoundError(`Ruta no encontrada: ${req.method} ${req.originalUrl}`));

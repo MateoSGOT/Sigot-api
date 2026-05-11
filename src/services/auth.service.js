@@ -109,13 +109,15 @@ const me = async (id_empleado) => {
   return empleado;
 };
 
-const clienteLogin = async (correo) => {
+const clienteLogin = async (correo, documento) => {
   const { prisma } = require('../config/db');
   const cliente = await prisma.cliente.findFirst({
     where: { Correo: correo, Estado: true },
     include: { tipoDoc: { select: { Nombre: true } } },
   });
-  if (!cliente) throw new UnauthorizedError('Credenciales incorrectas');
+  if (!cliente || (documento && cliente.Documento !== String(documento))) {
+    throw new UnauthorizedError('Credenciales incorrectas');
+  }
 
   const { tipoDoc, ...clienteData } = cliente;
   const token = signToken({

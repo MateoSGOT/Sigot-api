@@ -73,9 +73,9 @@ const me = async (req, res, next) => {
 
 const clienteLogin = async (req, res, next) => {
   try {
-    const { Correo, Password } = req.body;
+    const { Correo, Documento } = req.body;
     if (!Correo) throw new BadRequestError('El correo es obligatorio');
-    const result = await authService.clienteLogin(Correo, Password);
+    const result = await authService.clienteLogin(Correo, Documento);
     res.json({ status: 'ok', data: result });
   } catch (err) {
     next(err);
