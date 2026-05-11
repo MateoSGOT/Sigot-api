@@ -133,6 +133,32 @@ async function main() {
     console.log(`Permisos asignados al rol Administrador.`);
   }
 
+  // ── Asignar permisos al rol Mecánico ─────────────────────────────────────
+  const permisosMecanico = [
+    'SERVICIOS.LISTAR',  'SERVICIOS.CONSULTAR',
+    'REPUESTOS.LISTAR',  'REPUESTOS.CONSULTAR',
+    'CLIENTES.LISTAR',   'CLIENTES.CONSULTAR',
+    'VEHICULOS.LISTAR',  'VEHICULOS.CONSULTAR',
+    'AGENDA.LISTAR',     'AGENDA.CONSULTAR',   'AGENDA.REGISTRAR', 'AGENDA.EDITAR', 'AGENDA.CAMBIAR_ESTADO',
+    'ORDENES.LISTAR',    'ORDENES.CONSULTAR',  'ORDENES.EDITAR',   'ORDENES.CAMBIAR_ESTADO',
+    'NOVEDADES.LISTAR',  'NOVEDADES.REGISTRAR','NOVEDADES.EDITAR',
+    'CATEGORIAS.LISTAR',
+    'PROVEEDORES.LISTAR',
+  ];
+  const rolMec = await prisma.rol.findFirst({ where: { Nombre: 'Mecánico' } });
+  if (rolMec) {
+    for (const nombre of permisosMecanico) {
+      const p = await prisma.permisos.findFirst({ where: { Nombre: nombre } });
+      if (!p) continue;
+      await prisma.roles_x_Permisos.upsert({
+        where:  { Id_Rol_Id_Permiso: { Id_Rol: rolMec.Id_Rol, Id_Permiso: p.Id_Permiso } },
+        update: {},
+        create: { Id_Rol: rolMec.Id_Rol, Id_Permiso: p.Id_Permiso },
+      });
+    }
+    console.log('Permisos asignados al rol Mecánico.');
+  }
+
   // ── Marcas ────────────────────────────────────────────────────────────────
   const marcas = ['Chevrolet','Renault','Mazda','Toyota','Nissan','Kia','Hyundai','Ford','Volkswagen','Honda','Suzuki','Mitsubishi'];
   for (const nombre of marcas) {
