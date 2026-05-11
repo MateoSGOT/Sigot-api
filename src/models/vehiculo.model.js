@@ -2,6 +2,7 @@ const { prisma } = require('../config/db');
 
 const _fmt = ({ cliente, marca, ...v }) => ({
   ...v,
+  Anio:    v.Año ?? v.Anio,
   Cliente: cliente.Nombre,
   Marca:   marca.Nombre,
 });
@@ -48,7 +49,7 @@ const findByVIN = async (vin, excludeId = null) => {
   });
 };
 
-const create = async ({ Placa, VIN, Id_Cliente, Id_Marca, Modelo, Año, Color, NumeroEjes }) => {
+const create = async ({ Placa, VIN, Id_Cliente, Id_Marca, Modelo, Anio, Año, Color, NumeroEjes }) => {
   const row = await prisma.vehiculo.create({
     data: {
       Placa,
@@ -56,7 +57,7 @@ const create = async ({ Placa, VIN, Id_Cliente, Id_Marca, Modelo, Año, Color, N
       Id_Cliente,
       Id_Marca,
       Modelo,
-      Año,
+      Año:        Anio ?? Año,
       Color:      Color      || null,
       NumeroEjes: NumeroEjes ?? null,
     },
@@ -65,14 +66,15 @@ const create = async ({ Placa, VIN, Id_Cliente, Id_Marca, Modelo, Año, Color, N
   return _fmt(row);
 };
 
-const update = async (id, { Placa, VIN, Id_Cliente, Id_Marca, Modelo, Año, Color, NumeroEjes }) => {
+const update = async (id, { Placa, VIN, Id_Cliente, Id_Marca, Modelo, Anio, Año, Color, NumeroEjes }) => {
+  const anio = Anio ?? Año;
   const data = {};
   if (Placa       != null) data.Placa       = Placa;
   if (VIN         != null) data.VIN         = VIN;
   if (Id_Cliente  != null) data.Id_Cliente  = Id_Cliente;
   if (Id_Marca    != null) data.Id_Marca    = Id_Marca;
   if (Modelo      != null) data.Modelo      = Modelo;
-  if (Año         != null) data.Año         = Año;
+  if (anio        != null) data.Año         = anio;
   if (Color       != null) data.Color       = Color;
   if (NumeroEjes  != null) data.NumeroEjes  = NumeroEjes;
   try {
