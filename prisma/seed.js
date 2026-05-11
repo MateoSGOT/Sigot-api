@@ -186,22 +186,42 @@ async function main() {
   if (!tipoCC)   throw new Error('Seed: no se encontró el tipo de doc "Cédula de Ciudadanía"');
   if (!rolAdmin) throw new Error('Seed: no se encontró el rol "Administrador"');
 
-  const hash = await bcrypt.hash('Admin2024!', 10);
+  const hashAdmin = await bcrypt.hash('admin123', 10);
 
   await prisma.empleado.upsert({
     where:  { Correo: 'admin@sigot.com' },
-    update: { Password: hash },
+    update: { Password: hashAdmin },
     create: {
       Documento:  '0000000001',
       Nombre:     'Administrador SIGOT',
       Id_TipoDoc: tipoCC.Id_TipoDoc,
       Id_Rol:     rolAdmin.Id_Rol,
       Correo:     'admin@sigot.com',
-      Password:   hash,
+      Password:   hashAdmin,
       Estado:     true,
     },
   });
   console.log('Empleado admin@sigot.com listo (upsert).');
+
+  // ── Empleado técnico demo ─────────────────────────────────────────────────
+  const rolMecanico = await prisma.rol.findFirst({ where: { Nombre: 'Mecánico' } });
+  if (rolMecanico) {
+    const hashTecnico = await bcrypt.hash('tecnico123', 10);
+    await prisma.empleado.upsert({
+      where:  { Correo: 'tecnico@sigot.com' },
+      update: { Password: hashTecnico },
+      create: {
+        Documento:  '0000000002',
+        Nombre:     'Técnico Demo',
+        Id_TipoDoc: tipoCC.Id_TipoDoc,
+        Id_Rol:     rolMecanico.Id_Rol,
+        Correo:     'tecnico@sigot.com',
+        Password:   hashTecnico,
+        Estado:     true,
+      },
+    });
+    console.log('Empleado tecnico@sigot.com listo (upsert).');
+  }
 
   // ── Cliente demo para portal ──────────────────────────────────────────────
   await prisma.cliente.upsert({
